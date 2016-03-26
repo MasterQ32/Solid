@@ -16,7 +16,8 @@ namespace Solid.UI
 
 		public UIMapper()
 		{
-			this.RegisterConverter<Color>(new ColorConverter());
+			this.RegisterConverter<Color, ColorConverter>();
+			this.RegisterConverter<Brush, BrushConverter>();
 		}
 
 		protected override Widget CreateNode(string nodeClass)

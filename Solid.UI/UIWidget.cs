@@ -3,7 +3,6 @@ using OpenTK.Graphics.OpenGL4;
 using Solid.Layout;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,15 +11,15 @@ namespace Solid.UI
 {
     public class UIWidget : Widget
     {
-		public static readonly SolidProperty BackgroundProperty = SolidProperty.Register<UIWidget, Color>(nameof(Background), new SolidPropertyMetadata()
+		public static readonly SolidProperty BackgroundProperty = SolidProperty.Register<UIWidget, Brush>(nameof(Background), new SolidPropertyMetadata()
 		{
-			DefaultValue = Color.Transparent,
+			DefaultValue = null,
 			InheritFromHierarchy = true,
 		});
 
-		public static readonly SolidProperty ForegroundProperty = SolidProperty.Register<UIWidget, Color>(nameof(Foreground), new SolidPropertyMetadata()
+		public static readonly SolidProperty ForegroundProperty = SolidProperty.Register<UIWidget, Brush>(nameof(Foreground), new SolidPropertyMetadata()
 		{
-			DefaultValue = Color.Black,
+			DefaultValue = new SolidBrush(Color4.Black),
 			InheritFromHierarchy = true,
 		});
 		
@@ -54,24 +53,24 @@ namespace Solid.UI
 		/// </summary>
 		/// <returns></returns>
 		public Rectangle GetClientRectangle() => new Rectangle(
-			(int)this.Position.X, (int)this.Position.Y,
-			(int)this.Size.Width, (int)this.Size.Height);
+			this.Position.X, this.Position.Y,
+			this.Size.Width, this.Size.Height);
 
 		/// <summary>
 		/// Gets or sets the background color of this widget.
 		/// </summary>
-		public Color Background
+		public Brush Background
 		{
-			get { return Get<Color>(BackgroundProperty); }
+			get { return Get<Brush>(BackgroundProperty); }
 			set { Set(BackgroundProperty, value); }
 		}
 
 		/// <summary>
 		/// Gets or sets the foreground color of this widget.
 		/// </summary>
-		public Color Foreground
+		public Brush Foreground
 		{
-			get { return Get<Color>(BackgroundProperty); }
+			get { return Get<Brush>(BackgroundProperty); }
 			set { Set(BackgroundProperty, value); }
 		}
 

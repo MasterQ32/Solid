@@ -45,6 +45,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Brush.cs" />
+    <Compile Include="BrushConverter.cs" />
+    <Compile Include="Rectangle.cs" />
+    <Compile Include="SolidBrush.cs" />
+    <Compile Include="Texture.cs" />
+    <Compile Include="TextureBrush.cs" />
     <Compile Include="UIMapper.cs" />
     <Compile Include="UIWidget.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
