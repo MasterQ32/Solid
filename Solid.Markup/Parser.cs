@@ -17,6 +17,14 @@ namespace Solid.Markup
 
 		}
 
+		public static MarkupDocument Load(string fileName)
+		{
+			using (var fs = File.Open(fileName, FileMode.Open, FileAccess.Read))
+			{
+				return Parse(fs);
+			}
+		}
+
 		public static MarkupDocument Parse(string source) => Parse(new StringReader(source));
 
 		public static MarkupDocument Parse(Stream source) => Parse(source, Encoding.UTF8);

@@ -42,7 +42,7 @@
   <ItemGroup>
     <Compile Include="Canvas.cs" />
     <Compile Include="DockPanel.cs" />
-    <Compile Include="Layout.cs" />
+    <Compile Include="LayoutDocument.cs" />
     <Compile Include="LayoutMapper.cs" />
     <Compile Include="Point.cs" />
     <Compile Include="Size.cs" />

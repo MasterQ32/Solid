@@ -6,9 +6,14 @@ namespace Solid.Markup
 	{
 		public object Root { get; set; }
 
+		public void NotifyCreateNode(object node)
+		{
+			// discard
+		}
+
 		public void SetNodeName(object node, string name)
 		{
-			// Discard
+			// discard
 		}
 
 		public void SetRoot(object root)

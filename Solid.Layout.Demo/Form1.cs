@@ -13,7 +13,7 @@ namespace Solid.Layout.Demo
 {
 	public partial class Form1 : Form
 	{
-		Layout layout;
+		LayoutDocument layout;
 
 		public Form1()
 		{

@@ -110,6 +110,8 @@ namespace Solid.Markup
 			if (node.ID != null)
 				doc.SetNodeName(obj, node.ID);
 
+			doc.NotifyCreateNode(obj);
+
 			return obj;
 		}
 
