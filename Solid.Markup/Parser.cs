@@ -60,6 +60,7 @@ namespace Solid.Markup
 			var node = new MarkupNode()
 			{
 				Type = nodeType,
+				ID = nodeName,
 			};
 
 			if (nodeName != null)

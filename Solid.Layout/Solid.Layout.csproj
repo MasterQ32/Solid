@@ -4,14 +4,13 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{A34D0DA8-5AF5-4846-8F31-74987B982126}</ProjectGuid>
+    <ProjectGuid>{58B6DC3C-CC8E-4046-BE6D-0B60F1828455}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Solid.Markup</RootNamespace>
-    <AssemblyName>Solid.Markup</AssemblyName>
+    <RootNamespace>Solid.Layout</RootNamespace>
+    <AssemblyName>Solid.Layout</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -21,7 +20,6 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -30,33 +28,37 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IMarkupDocument.cs" />
-    <Compile Include="MarkupDocument.cs" />
-    <Compile Include="MarkupMapper.cs" />
-    <Compile Include="MarkupNode.cs" />
-    <Compile Include="MarkupProperty.cs" />
-    <Compile Include="NativeMapper.cs" />
-    <Compile Include="Parser.cs" />
+    <Compile Include="DockLayout.cs" />
+    <Compile Include="Layout.cs" />
+    <Compile Include="LayoutMapper.cs" />
+    <Compile Include="Point.cs" />
+    <Compile Include="Size.cs" />
+    <Compile Include="Alignment.cs" />
+    <Compile Include="StackLayout.cs" />
+    <Compile Include="Thickness.cs" />
+    <Compile Include="Widget.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SolidMapper.cs" />
-    <Compile Include="StubDocument.cs" />
-    <Compile Include="TypeMapper.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Solid.Base\Solid.Base.csproj">
       <Project>{199f9998-fe1b-4ddf-aa4b-505b56742901}</Project>
       <Name>Solid.Base</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Solid.Markup\Solid.Markup.csproj">
+      <Project>{a34d0da8-5af5-4846-8f31-74987b982126}</Project>
+      <Name>Solid.Markup</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

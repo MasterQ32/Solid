@@ -4,11 +4,12 @@ using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 using Solid.Markup;
 using System.IO;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace Solid.Test
 {
 	[TestClass]
-	public class SoildMarkup
+	public class ParserTest
 	{
 
 		[TestMethod]
@@ -322,8 +323,8 @@ namespace Solid.Test
 			IsNotNull(doc["root"]);
 			IsNotNull(doc["child"]);
 
-			AreEqual(doc.Root, doc["root"]);
-			AreEqual(doc.Root.Children[0], doc["child"]);
+			AreSame(doc.Root, doc["root"]);
+			AreSame(doc.Root.Children[0], doc["child"]);
 		}
 	}
 }

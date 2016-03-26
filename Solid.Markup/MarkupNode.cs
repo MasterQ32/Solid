@@ -13,6 +13,8 @@ namespace Solid.Markup
 
 		public string Type { get; set; }
 
+		public string ID { get; set; }
+
 		public IDictionary<string, MarkupProperty> Attributes { get; } = new Dictionary<string, MarkupProperty>();
 	}
 }
