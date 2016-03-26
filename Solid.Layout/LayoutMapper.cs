@@ -12,6 +12,8 @@ namespace Solid.Layout
 			RegisterType<Canvas>();
 			RegisterType<Table>();
 			RegisterType<Widget>();
+
+			RegisterConverter<Thickness, ThicknessConverter>();
 		}
 
 		protected override IMarkupDocument<Widget> CreateDocument() => new LayoutDocument();

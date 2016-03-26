@@ -47,6 +47,7 @@
     <Compile Include="MarkupNode.cs" />
     <Compile Include="MarkupProperty.cs" />
     <Compile Include="NativeMapper.cs" />
+    <Compile Include="NodeEventArgs.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SolidMapper.cs" />

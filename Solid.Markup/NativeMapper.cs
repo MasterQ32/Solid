@@ -6,6 +6,8 @@ namespace Solid.Markup
 	{
 		private readonly TypeMapper types;
 
+		public event EventHandler<NodeEventArgs> NamedNodeEmitted;
+
 		public NativeMapper(TypeMapper types)
 		{
 			this.types = types;
@@ -13,10 +15,22 @@ namespace Solid.Markup
 
 		public object Instantiate(MarkupDocument document)
 		{
-			return ((StubDocument)this.Map(document)).Root;
+			var doc = (StubDocument)this.Map(document);
+			doc.NamedNodeEmitted -= Doc_NamedNodeEmitted;
+			return doc.Root;
 		}
 
-		protected override IMarkupDocument<object> CreateDocument() => new StubDocument();
+		protected override IMarkupDocument<object> CreateDocument()
+		{
+			var doc = new StubDocument();
+			doc.NamedNodeEmitted += Doc_NamedNodeEmitted;
+			return doc;
+		}
+
+		private void Doc_NamedNodeEmitted(object sender, NodeEventArgs e)
+		{
+			this.NamedNodeEmitted?.Invoke(this, e);
+		}
 
 		protected override object CreateNode(string nodeClass)
 		{

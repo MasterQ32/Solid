@@ -9,6 +9,10 @@ using System.Threading.Tasks;
 
 namespace Solid.Markup
 {
+	/// <summary>
+	/// A mapper that will map a MarkupDocument to a custom type.
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
 	public abstract class MarkupMapper<T>
 		where T : class
 	{

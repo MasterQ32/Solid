@@ -4,6 +4,8 @@ namespace Solid.Markup
 {
 	internal class StubDocument : IMarkupDocument<object>
 	{
+		public event EventHandler<NodeEventArgs> NamedNodeEmitted;
+
 		public object Root { get; set; }
 
 		public void NotifyCreateNode(object node)
@@ -13,7 +15,11 @@ namespace Solid.Markup
 
 		public void SetNodeName(object node, string name)
 		{
-			// discard
+			this.NamedNodeEmitted?.Invoke(this, new NodeEventArgs()
+			{
+				Name = name,
+				Node = node,
+			});
 		}
 
 		public void SetRoot(object root)

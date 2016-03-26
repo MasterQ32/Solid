@@ -50,6 +50,7 @@
     <Compile Include="StackPanel.cs" />
     <Compile Include="Table.cs" />
     <Compile Include="Thickness.cs" />
+    <Compile Include="ThicknessConverter.cs" />
     <Compile Include="Widget.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

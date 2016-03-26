@@ -18,6 +18,7 @@ namespace Solid.UI
 		{
 			this.RegisterConverter<Color, ColorConverter>();
 			this.RegisterConverter<Brush, BrushConverter>();
+			this.RegisterConverter<Skin, SkinConverter>();
 		}
 
 		protected override Widget CreateNode(string nodeClass)

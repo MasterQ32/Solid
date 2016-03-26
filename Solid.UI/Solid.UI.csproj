@@ -48,6 +48,8 @@
     <Compile Include="Brush.cs" />
     <Compile Include="BrushConverter.cs" />
     <Compile Include="Rectangle.cs" />
+    <Compile Include="Skin.cs" />
+    <Compile Include="SkinConverter.cs" />
     <Compile Include="SolidBrush.cs" />
     <Compile Include="Texture.cs" />
     <Compile Include="TextureBrush.cs" />
@@ -55,6 +57,7 @@
     <Compile Include="UIWidget.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UserInterface.cs" />
+    <Compile Include="WidgetDrawMode.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Solid.Base\Solid.Base.csproj">

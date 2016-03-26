@@ -293,7 +293,7 @@ namespace Solid.Markup
 			}
 		}
 
-		private string ReadNodeIdentifier(TextReader reader) => ReadWithPredicate(reader, (c) => char.IsLetter(c) || (c == '.'));
+		private string ReadNodeIdentifier(TextReader reader) => ReadWithPredicate(reader, (c) => char.IsLetter(c) || (c == '.') || (c == '_'));
 
 		private string ReadAttributeIdentifier(TextReader reader) => ReadWithPredicate(reader, (c) => char.IsLetter(c) || (c == '.') || (c == '_'));
 

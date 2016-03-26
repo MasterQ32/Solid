@@ -62,5 +62,7 @@ namespace Solid.UI
 		public int Width { get; private set; }
 
 		public int Height { get; private set; }
+
+		public Layout.Size Size => new Layout.Size(this.Width, this.Height);
 	}
 }
