@@ -7,27 +7,52 @@ using System.Text;
 
 namespace Solid
 {
+	/// <summary>
+	/// Provides a bindable property system with property notifications.
+	/// </summary>	
 	public class SolidObject : INotifyPropertyChanged
 	{
 		private Dictionary<SolidProperty, PropertyValue> properties = new Dictionary<SolidProperty, PropertyValue>();
 
+		/// <summary>
+		/// Fires when a property has changed.
+		/// </summary>
 		public event PropertyChangedEventHandler PropertyChanged;
 
+		/// <summary>
+		/// Sends a PropertyChanged event.
+		/// </summary>
+		/// <param name="propertyName"></param>
 		protected void OnPropertyChanged(string propertyName)
 		{
 			this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 		}
 
+		/// <summary>
+		/// Sets the value of a SolidProperty.
+		/// </summary>
+		/// <param name="property"></param>
+		/// <param name="value"></param>
 		protected internal void Set(SolidProperty property, object value)
 		{
 			GetValueHolder(property).Value = value;
 		}
 
+		/// <summary>
+		/// Gets the value of a SolidProperty.
+		/// </summary>
+		/// <param name="property"></param>
+		/// <returns></returns>
 		protected internal object Get(SolidProperty property)
 		{
 			return GetValueHolder(property).Value;
 		}
 
+		/// <summary>
+		/// Gets an object that stores and verifies a property value.
+		/// </summary>
+		/// <param name="property"></param>
+		/// <returns></returns>
 		private PropertyValue GetValueHolder(SolidProperty property)
 		{
 			lock (this.properties)
@@ -47,6 +72,12 @@ namespace Solid
 			this.OnPropertyChanged(value.Property.Name);
 		}
 
+		/// <summary>
+		/// Gets a value of a SolidProperty.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="property"></param>
+		/// <returns></returns>
 		protected T Get<T>(SolidProperty property) => (T)Get(property);
 
 		private class PropertyValue
@@ -77,7 +108,7 @@ namespace Solid
 						((this.value != null) && (this.value.Equals(value) == false)) ||
 						((value != null) && (value.Equals(this.value) == false));
 					this.value = value;
-					if (changed)
+					if (changed && this.property.Metadata.EmitsChangedEvent)
 						this.ValueChanged.Invoke(this, EventArgs.Empty);
 				}
 			}

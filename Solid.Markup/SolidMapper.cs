@@ -41,9 +41,12 @@ namespace Solid.Markup
 				base.SetProperty(obj, markupProperty);
 				return;
 			}
-
+			
 			if (markupProperty.Type == MarkupPropertyType.Binding)
 				throw new NotSupportedException("Bindings of SolidProperty is not supported yet.");
+
+			if (property.Metadata.IsExported == false)
+				throw new NotSupportedException("Setting a non-exported property is not supported.");
 			
 			property.SetValue(obj, ConvertPropertyType(property.PropertyType, markupProperty));
 		}

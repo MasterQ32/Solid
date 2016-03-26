@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace Solid
 {
+	/// <summary>
+	/// A bindable property.
+	/// </summary>
 	public sealed class SolidProperty
 	{
 		private static readonly Dictionary<Type, Dictionary<string, SolidProperty>> registry = new Dictionary<Type, Dictionary<string, SolidProperty>>();
@@ -20,6 +23,12 @@ namespace Solid
 			}
 		}
 
+		/// <summary>
+		/// Gets a named property of a given type.
+		/// </summary>
+		/// <param name="type"></param>
+		/// <param name="name"></param>
+		/// <returns></returns>
 		public static SolidProperty GetProperty(Type type, string name)
 		{
 			var registry = GetRegistryForType(type);
@@ -34,6 +43,11 @@ namespace Solid
 				return null;
 		}
 
+		/// <summary>
+		/// Gets a list of all properties for the given type.
+		/// </summary>
+		/// <param name="type"></param>
+		/// <returns></returns>
 		public static IDictionary<string, SolidProperty> GetProperties(Type type)
 		{
 			var registry = GetRegistryForType(type);
@@ -54,6 +68,15 @@ namespace Solid
 			return properties;
 		}
 
+		/// <summary>
+		/// Registers a property for a given type.
+		/// </summary>
+		/// <param name="objectType">The type of the class the property is defined on.</param>
+		/// <param name="name">The name of the property.</param>
+		/// <param name="propertyType">The type of the property value.</param>
+		/// <param name="metaData">Some metadata that allows specification of the properties behaviour.</param>
+		/// <returns>Registered property</returns>
+		/// <exception cref="System.InvalidOperationException">Is thrown when a property with the given name is already registered.</exception>
 		public static SolidProperty Register(
 			Type objectType,
 			string name,
@@ -72,6 +95,15 @@ namespace Solid
 			return property;
 		}
 
+		/// <summary>
+		/// Registers a property for a given type.
+		/// </summary>
+		/// <typeparam name="TObject">The type of the class the property is defined on.</typeparam>
+		/// <typeparam name="TProperty">The type of the property value.</typeparam>
+		/// <param name="propertyName">The name of the property.</param>
+		/// <param name="defaultValue">The default value the property has.</param>
+		/// <returns>Registered property</returns>
+		/// <exception cref="System.InvalidOperationException">Is thrown when a property with the given name is already registered.</exception>
 		public static SolidProperty Register<TObject, TProperty>(string propertyName, TProperty defaultValue = default(TProperty))
 			where TObject : SolidObject
 			=> Register(typeof(TObject), propertyName, typeof(TProperty), new SolidPropertyMetadata()
@@ -80,6 +112,15 @@ namespace Solid
 			});
 
 
+		/// <summary>
+		/// Registers a property for a given type.
+		/// </summary>
+		/// <typeparam name="TObject">The type of the class the property is defined on.</typeparam>
+		/// <typeparam name="TProperty">The type of the property value.</typeparam>
+		/// <param name="propertyName">The name of the property.</param>
+		/// <param name="metaData">Some metadata that allows specification of the properties behaviour.</param>
+		/// <returns>Registered property</returns>
+		/// <exception cref="System.InvalidOperationException">Is thrown when a property with the given name is already registered.</exception>
 		public static SolidProperty Register<TObject, TProperty>(string propertyName, SolidPropertyMetadata metaData)
 			where TObject : SolidObject
 			=> Register(typeof(TObject), propertyName, typeof(TProperty), metaData);
@@ -96,22 +137,56 @@ namespace Solid
 			this.Metadata = meta;
 		}
 
+		/// <summary>
+		/// Gets the default value of the property.
+		/// </summary>
 		public object DefaultValue => this.Metadata?.DefaultValue;
 
+		/// <summary>
+		/// Gets if the property is exported to script languages.
+		/// </summary>
 		public bool IsExported => this.Metadata?.IsExported ?? true;
 
+		/// <summary>
+		/// Gets the name of the property.
+		/// </summary>
 		public string Name { get; private set; }
 
+		/// <summary>
+		/// Gets the type the property is bound to.
+		/// </summary>
 		public Type ObjectType { get; private set; }
 
+		/// <summary>
+		/// Gets the type of the property value.
+		/// </summary>
 		public Type PropertyType { get; private set; }
 
-		internal SolidPropertyMetadata Metadata { get; private set; }
+		/// <summary>
+		/// Gets the meta data for the property.
+		/// </summary>
+		public SolidPropertyMetadata Metadata { get; private set; }
 
+		/// <summary>
+		/// Sets the value on the target object.
+		/// </summary>
+		/// <param name="target"></param>
+		/// <param name="value"></param>
 		public void SetValue(SolidObject target, object value) => target.Set(this, value);
 
+		/// <summary>
+		/// Gets the value from the target object.
+		/// </summary>
+		/// <param name="target"></param>
+		/// <returns></returns>
 		public object GetValue(SolidObject target) => target.Get(this);
 
+		/// <summary>
+		/// Gets the value from the target object.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="target"></param>
+		/// <returns></returns>
 		public T GetValue<T>(SolidObject target) => (T)target.Get(this);
 	}
 }
