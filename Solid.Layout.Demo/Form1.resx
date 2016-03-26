@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="textBoxCode.Text" xml:space="preserve">
-    <value>StackLayout {
+    <value>StackPanel {
 	ColorWidget(Width = 100, Height = 100, VerticalAlignment=Stretch);
 	ColorWidget(Width = 100, Height = 100, VerticalAlignment=Top);
 	ColorWidget(Width = 100, Height = 100, VerticalAlignment=Middle);

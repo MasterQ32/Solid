@@ -18,8 +18,10 @@ namespace Solid.Layout
 		{
 			switch(nodeClass)
 			{
-				case "StackLayout": return new StackLayout();
-				case "DockLayout": return new DockLayout();
+				case "StackPanel": return new StackPanel();
+				case "DockPanel": return new DockPanel();
+				case "Canvas": return new Canvas();
+				case "Table": return new Table();
 				case "Widget": return new Widget();
 				default: return base.CreateNode(nodeClass);
 			}

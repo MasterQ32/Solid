@@ -2,9 +2,9 @@
 
 namespace Solid.Layout
 {
-	public class StackLayout : Widget
+	public class StackPanel : Widget
 	{
-		public static readonly SolidProperty DirectionProperty = SolidProperty.Register<StackLayout, StackDirection>(nameof(Direction), StackDirection.Horizontal);
+		public static readonly SolidProperty DirectionProperty = SolidProperty.Register<StackPanel, StackDirection>(nameof(Direction), StackDirection.Horizontal);
 
 		public StackDirection Direction
 		{
