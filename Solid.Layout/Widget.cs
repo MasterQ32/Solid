@@ -9,7 +9,7 @@ using static System.Math;
 
 namespace Solid.Layout
 {
-	public class Widget : SolidObject
+	public class Widget : SolidObject, IHierarchicalObject
 	{
 		private readonly WidgetChildCollection children;
 		private Widget parent = null;
@@ -481,6 +481,14 @@ namespace Solid.Layout
 
 			IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 		}
+
+		#endregion
+
+		#region IHierarchicalObject
+
+		IHierarchicalObject IHierarchicalObject.Parent => this.parent;
+
+		IEnumerable<IHierarchicalObject> IHierarchicalObject.Children => this.children;
 
 		#endregion
 	}

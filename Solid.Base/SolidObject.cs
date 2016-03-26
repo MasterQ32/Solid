@@ -14,6 +14,21 @@ namespace Solid
 	{
 		private Dictionary<SolidProperty, PropertyValue> properties = new Dictionary<SolidProperty, PropertyValue>();
 
+		public SolidObject()
+		{
+			foreach (var property in SolidProperty.GetProperties(this.GetType()))
+			{
+				var value = new PropertyValue(this, property.Value);
+				value.ValueChanged += Value_ValueChanged;
+				this.properties.Add(property.Value, value);
+			}
+		}
+
+		public bool HasProperty(SolidProperty property)
+		{
+			return this.properties.ContainsKey(property);
+		}
+
 		/// <summary>
 		/// Fires when a property has changed.
 		/// </summary>
@@ -59,10 +74,13 @@ namespace Solid
 			{
 				if (this.properties.ContainsKey(property))
 					return this.properties[property];
-				var value = new PropertyValue(property);
+				throw new NotSupportedException("Late binding of properties is not supported.");
+				/*
+				var value = new PropertyValue(this, property);
 				value.ValueChanged += Value_ValueChanged;
 				this.properties.Add(property, value);
 				return value;
+				*/
 			}
 		}
 
@@ -84,22 +102,53 @@ namespace Solid
 		{
 			private object value;
 			private readonly SolidProperty property;
+			private readonly SolidObject target;
+			private readonly IHierarchicalObject hierarchy;
 
 			public event EventHandler ValueChanged;
 
-			public PropertyValue(SolidProperty property)
+			public PropertyValue(SolidObject target, SolidProperty property)
 			{
 				this.property = property;
-				this.value = this.property.DefaultValue;
+				this.target = target;
+				this.hierarchy = this.target as IHierarchicalObject;
+			}
+
+			public bool HasValueAssigned { get; private set; }
+
+			public void ResetValue()
+			{
+				this.HasValueAssigned = false;
 			}
 
 			public object Value
 			{
-				get { return this.value; }
+				get
+				{
+					if(this.HasValueAssigned)
+						return this.value;
+					if(this.property.Metadata.InheritFromHierarchy && (this.hierarchy != null))
+					{
+						var parent = this.hierarchy.Parent;
+						while(parent != null)
+						{
+							var obj = (SolidObject)parent;
+							if(obj.HasProperty(this.property))
+							{
+								return obj.Get(this.property);
+							}
+							parent = parent.Parent;
+						}
+					}
+					return this.property.Metadata.DefaultValue;
+				}
 				set
 				{
 					if (this.property.PropertyType.IsAssignableFrom(value?.GetType()) == false)
 						throw new InvalidOperationException($"Cannot assign {this.property.PropertyType.Name} from {value?.GetType()?.Name}.");
+
+					this.HasValueAssigned = true;
+
 					if (this.value == value)
 						return;
 					var changed =

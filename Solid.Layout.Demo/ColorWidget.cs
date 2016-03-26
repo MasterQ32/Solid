@@ -4,7 +4,11 @@ namespace Solid.Layout.Demo
 {
 	class ColorWidget : Widget
 	{
-		public static readonly SolidProperty ColorProperty = SolidProperty.Register<ColorWidget, Color>(nameof(Color));
+		public static readonly SolidProperty ColorProperty = SolidProperty.Register<ColorWidget, Color>(nameof(Color), new SolidPropertyMetadata()
+		{
+			DefaultValue = Color.DimGray,
+			InheritFromHierarchy = true,
+		});
 
 		public void Paint(Graphics g)
 		{

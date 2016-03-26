@@ -13,6 +13,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Solid.Layout", "Solid.Layou
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Solid.Layout.Demo", "Solid.Layout.Demo\Solid.Layout.Demo.csproj", "{6EF4609E-77B2-4BC5-B2D7-C3B487FC34AA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Solid.UI", "Solid.UI\Solid.UI.csproj", "{81A14CBE-AC8B-45D3-A540-9ACF208FB9C7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Solid.UI.Demo", "Solid.UI.Demo\Solid.UI.Demo.csproj", "{C12C6911-5831-4026-9771-09162C8120B3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +43,14 @@ Global
 		{6EF4609E-77B2-4BC5-B2D7-C3B487FC34AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6EF4609E-77B2-4BC5-B2D7-C3B487FC34AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6EF4609E-77B2-4BC5-B2D7-C3B487FC34AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81A14CBE-AC8B-45D3-A540-9ACF208FB9C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81A14CBE-AC8B-45D3-A540-9ACF208FB9C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81A14CBE-AC8B-45D3-A540-9ACF208FB9C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81A14CBE-AC8B-45D3-A540-9ACF208FB9C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C12C6911-5831-4026-9771-09162C8120B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C12C6911-5831-4026-9771-09162C8120B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C12C6911-5831-4026-9771-09162C8120B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C12C6911-5831-4026-9771-09162C8120B3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
