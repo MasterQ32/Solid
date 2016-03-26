@@ -41,8 +41,12 @@ namespace Solid.UI
 		{
 			// Render the UI element here...
 			// TODO: Improve the widget rendering...
-			GL.ClearColor(this.Background);
+			GL.ClearColor(Color4.Pink);
 			GL.Clear(ClearBufferMask.ColorBufferBit);
+
+			var g = this.UserInterface;
+			
+			g.FillRectangle(this.GetClientRectangle(), this.Background);
 		}
 
 		/// <summary>

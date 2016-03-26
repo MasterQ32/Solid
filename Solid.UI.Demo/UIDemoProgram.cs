@@ -4,6 +4,7 @@ using OpenTK.Graphics.OpenGL4;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -20,8 +21,8 @@ namespace Solid.UI.Demo
 		}
 
 		UserInterface ui;
-		
-		public UIDemoProgram() : 
+
+		public UIDemoProgram() :
 			base(
 				1280, 720,
 				GraphicsMode.Default,
@@ -36,7 +37,43 @@ namespace Solid.UI.Demo
 
 		protected override void OnLoad(EventArgs e)
 		{
+			GL.DebugMessageCallback(this.Callback, IntPtr.Zero);
 			this.ui.InitializeOpenGL();
+		}
+
+		private void Callback(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr message, IntPtr userParam)
+		{
+			var msg = Marshal.PtrToStringAnsi(message, length);
+
+			switch (severity)
+			{
+				case DebugSeverity.DebugSeverityHigh:
+				{
+					Console.ForegroundColor = ConsoleColor.Red;
+					break;
+				}
+				case DebugSeverity.DebugSeverityMedium:
+				{
+					Console.ForegroundColor = ConsoleColor.DarkYellow;
+					break;
+				}
+				case DebugSeverity.DebugSeverityLow:
+				{
+					Console.ForegroundColor = ConsoleColor.Yellow;
+					break;
+				}
+				default:
+				case DebugSeverity.DebugSeverityNotification:
+				{
+					Console.ForegroundColor = ConsoleColor.White;
+					break;
+				}
+			}
+			
+			Console.WriteLine("[{0}] {1}", source, msg);
+
+			if (severity == DebugSeverity.DebugSeverityHigh)
+				System.Diagnostics.Debugger.Break();
 		}
 
 		protected override void OnResize(EventArgs e)

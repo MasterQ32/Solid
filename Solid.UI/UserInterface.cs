@@ -3,6 +3,7 @@ using Solid.Markup;
 using OpenTK.Graphics.OpenGL4;
 using System.Drawing;
 using System;
+using OpenTK.Graphics;
 
 namespace Solid.UI
 { 
@@ -11,6 +12,9 @@ namespace Solid.UI
 		private int vertexArray;
 		private int vertexBuffer;
 		private int blitTextureShader;
+
+		private int rectangleLocation;
+		private int colorLocation;
 
 		private Layout.Size screenSize;
 
@@ -57,6 +61,8 @@ namespace Solid.UI
 			GL.Disable(EnableCap.DepthTest);
 
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+
+			GL.Uniform2(this.screenSizeLocation, this.screenSize.Width, this.screenSize.Height);
 		}
 
 		public void EndDraw()
@@ -65,6 +71,18 @@ namespace Solid.UI
 			GL.Disable(EnableCap.Blend);
 			GL.BindVertexArray(0);
 			GL.UseProgram(0);
+		}
+
+		public void FillRectangle(Rectangle area, Color color)
+		{
+			GL.Uniform4(this.rectangleLocation, (float)area.X, (float)area.Y, (float)area.Width, (float)area.Height);
+			GL.Uniform4(this.colorLocation, (Color4)color);
+			this.DrawRawQuad();
+		}
+
+		private void DrawRawQuad()
+		{
+			GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
 		}
 
 		public void InitializeOpenGL()
@@ -108,7 +126,7 @@ namespace Solid.UI
 				GL.ShaderSource(vertexShader, vertexShaderSource);
 				GL.CompileShader(vertexShader);
 
-				var fragmentShader = GL.CreateShader(ShaderType.VertexShader);
+				var fragmentShader = GL.CreateShader(ShaderType.FragmentShader);
 				GL.ShaderSource(fragmentShader, fragmentShaderSource);
 				GL.CompileShader(fragmentShader);
 
@@ -123,15 +141,41 @@ namespace Solid.UI
 
 				GL.DeleteShader(vertexShader);
 				GL.DeleteShader(fragmentShader);
+
+				this.rectangleLocation = GL.GetUniformLocation(this.blitTextureShader, "uRectangle");
+				this.screenSizeLocation = GL.GetUniformLocation(this.blitTextureShader, "uScreenSize");
+				this.colorLocation = GL.GetUniformLocation(this.blitTextureShader, "uColor");
 			}
 		}
 
 		static string vertexShaderSource =
-@"something";
+@"#version 330 core
+
+layout(location = 0) in vec2 vPosition;
+
+uniform vec4 uRectangle;
+uniform vec2 uScreenSize;
+
+void main()
+{
+	float x = 2.0f * (uRectangle.x + vPosition.x * uRectangle.z) / uScreenSize.x - 1.0f;
+	float y = 1.0f - 2.0f * (uRectangle.y + vPosition.y * uRectangle.w) / uScreenSize.y;
+	gl_Position = vec4(x, y, 0.0f, 1.0f);
+}
+";
 
 		static string fragmentShaderSource =
-@"something";
-		
+@"#version 330 core
+
+out vec4 color;
+
+uniform vec4 uColor;
+
+void main() {
+	color = uColor;
+}";
+		private int screenSizeLocation;
+
 		public static UserInterface Load(string fileName)
 		{
 			var document = Parser.Load(fileName);
