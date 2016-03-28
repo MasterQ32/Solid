@@ -20,4 +20,7 @@ Skin
 			Center       : Texture(Source = "panel.png", Rect = "10;10;80;80");
 		}
 	}
+	Crosshair : Style {
+		Default : Texture(Source = "red_cross.png");
+	}
 }

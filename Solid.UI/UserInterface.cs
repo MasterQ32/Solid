@@ -4,6 +4,7 @@ using OpenTK.Graphics.OpenGL4;
 using System;
 using OpenTK.Graphics;
 using Solid.UI.Skinning;
+using OpenTK.Input;
 
 namespace Solid.UI
 {
@@ -13,6 +14,9 @@ namespace Solid.UI
 		private int vertexBuffer;
 
 		private Layout.Size screenSize;
+		private InputSource input;
+
+		private UIWidget currentMouseWidget;
 
 		protected override void OnNodeCreation(Widget node)
 		{
@@ -74,53 +78,6 @@ namespace Solid.UI
 			GL.BindVertexArray(0);
 			GL.UseProgram(0);
 		}
-		/*
-		public void DrawBox(Skin skin, string boxName, Rectangle target)
-		{
-			var tl = skin[boxName + "_TL"];
-			var tr = skin[boxName + "_TR"];
-			var bl = skin[boxName + "_BL"];
-			var br = skin[boxName + "_BR"];
-
-			var t = skin[boxName + "_T"];
-			var b = skin[boxName + "_B"];
-			var r = skin[boxName + "_R"];
-			var l = skin[boxName + "_L"];
-
-			FillRectangle(
-				new Rectangle(target.Position, tl.Size),
-				new TextureBrush(tl));
-
-			FillRectangle(
-				new Rectangle(target.Position + new Point(target.Width - tr.Width, 0.0f), tr.Size),
-				new TextureBrush(tr));
-
-			FillRectangle(
-				new Rectangle(target.Position + new Point(0.0f, target.Height - bl.Height), bl.Size),
-				new TextureBrush(bl));
-
-			FillRectangle(
-				new Rectangle(target.Position + new Point(target.Width - br.Width, target.Height - br.Height), br.Size),
-				new TextureBrush(br));
-
-
-
-			FillRectangle(
-				new Rectangle(target.X + tl.Width, target.Y, target.Width - tl.Width - tr.Width, t.Height),
-				new TextureBrush(t));
-
-			FillRectangle(
-				new Rectangle(target.X + bl.Width, target.Y + target.Height - b.Height, target.Width - bl.Width - br.Width, b.Height),
-				new TextureBrush(b));
-
-			FillRectangle(
-				new Rectangle(target.X, target.Y + tl.Height, l.Width, target.Height - tl.Height - bl.Height),
-				new TextureBrush(l));
-			FillRectangle(
-				new Rectangle(target.X + target.Width - r.Width, target.Y + tr.Height, r.Width, target.Height - tr.Height - br.Height),
-				new TextureBrush(r));
-		}
-		*/
 
 		public void RenderBrush(Brush brush, Rectangle area)
 		{
@@ -200,13 +157,146 @@ namespace Solid.UI
 
 		}
 
+		private void BindInput()
+		{
+			if (this.input == null)
+				return;
+
+			this.input.MouseDown += Input_MouseDown;
+			this.input.MouseMove += Input_MouseMove;
+			this.input.MouseUp += Input_MouseUp;
+			this.input.MouseWheel += Input_MouseWheel;
+
+			this.input.KeyDown += Input_KeyDown;
+			this.input.KeyPress += Input_KeyPress;
+			this.input.KeyUp += Input_KeyUp;
+		}
+
+		private void UnbindInput()
+		{
+			if (this.input == null)
+				return;
+		}
+
+		public Skin Skin { get; set; }
+
+		public InputSource Input
+		{
+			get { return this.input; }
+			set
+			{
+				this.UnbindInput();
+				this.input = value;
+				this.BindInput();
+			}
+		}
+
+		#region Input Handling
+
+		private UIWidget GetWidgetFromPosition(Point pt) => this.GetWidgetFromPosition(this.Root, pt);
+
+		private UIWidget GetWidgetFromPosition(Widget widget, Point pt)
+		{
+			var rect = new Rectangle(widget.Position, widget.Size);
+			if (rect.Contains(pt) == false)
+				return null;
+			foreach(var child in widget.Children)
+			{
+				var childWidget = GetWidgetFromPosition(child, pt);
+				if (childWidget != null)
+					return childWidget;
+			}
+			if (widget is UIWidget) {
+				var uiWidget = (UIWidget)widget;
+				if (uiWidget.IsTouchable == false)
+					return null;
+				return uiWidget;
+			}
+			else {
+				return null;
+			}
+		}
+		
+		private void Input_MouseWheel(object sender, OpenTK.Input.MouseWheelEventArgs e)
+		{
+			var ipos = new Point(e.X, e.Y);
+			var widget = this.GetWidgetFromPosition(ipos);
+			if (widget != null)
+			{
+				var cpos = widget.PointToClient(ipos);
+				widget.OnMouseWheel(new MouseWheelEventArgs((int)cpos.X, (int)cpos.Y, e.Value, e.Delta));
+			}
+		}
+
+		private void Input_MouseUp(object sender, OpenTK.Input.MouseButtonEventArgs e)
+		{
+			var ipos = new Point(e.X, e.Y);
+			var widget = this.GetWidgetFromPosition(ipos);
+			if (widget != null)
+			{
+				var cpos = widget.PointToClient(ipos);
+				widget.OnMouseUp(new MouseButtonEventArgs((int)cpos.X, (int)cpos.Y, e.Button, e.IsPressed));
+			}
+		}
+
+		private void Input_MouseMove(object sender, OpenTK.Input.MouseMoveEventArgs e)
+		{
+			var ipos = new Point(e.X, e.Y);
+			var widget = this.GetWidgetFromPosition(ipos);
+
+			if(widget != this.currentMouseWidget)
+			{
+				if (this.currentMouseWidget != null)
+				{
+					var localPos = this.currentMouseWidget.PointToClient(ipos);
+					this.currentMouseWidget.OnMouseLeave(new MouseEventArgs((int)localPos.X, (int)localPos.Y));
+				}
+				this.currentMouseWidget = widget;
+				if (this.currentMouseWidget != null)
+				{
+					var localPos = this.currentMouseWidget.PointToClient(ipos);
+					this.currentMouseWidget.OnMouseEnter(new MouseEventArgs((int)localPos.X, (int)localPos.Y));
+				}
+			}
+			if (widget == null)
+				return;
+			var cpos = widget.PointToClient(ipos);
+			widget.OnMouseMove(new MouseMoveEventArgs((int)cpos.X, (int)cpos.Y, e.XDelta, e.YDelta));
+		}
+
+		private void Input_MouseDown(object sender, OpenTK.Input.MouseButtonEventArgs e)
+		{
+			var ipos = new Point(e.X, e.Y);
+			var widget = this.GetWidgetFromPosition(ipos);
+			if (widget != null)
+			{
+				var cpos = widget.PointToClient(ipos);
+				widget.OnMouseDown(new MouseButtonEventArgs((int)cpos.X, (int)cpos.Y, e.Button, e.IsPressed));
+			}
+		}
+		
+		private void Input_KeyUp(object sender, OpenTK.Input.KeyboardKeyEventArgs e)
+		{
+
+		}
+
+		private void Input_KeyPress(object sender, OpenTK.KeyPressEventArgs e)
+		{
+
+		}
+
+		private void Input_KeyDown(object sender, OpenTK.Input.KeyboardKeyEventArgs e)
+		{
+
+		}
+
+		#endregion
+
 		public static UserInterface Load(string fileName)
 		{
 			var document = Parser.Load(fileName);
 			var mapper = new UIMapper();
 			return mapper.Instantiate(document);
 		}
-
-		public Skin Skin { get; set; }
 	}
 }

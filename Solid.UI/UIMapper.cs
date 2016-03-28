@@ -23,6 +23,7 @@ namespace Solid.UI
 			this.RegisterConverter<Rectangle, RectangleConverter>();
 
 			this.RegisterType<Panel>();
+			this.RegisterType<Button>();
 		}
 
 		protected override Widget CreateNode(string nodeClass)

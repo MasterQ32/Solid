@@ -1,5 +1,7 @@
-﻿using OpenTK.Graphics;
+﻿using OpenTK;
+using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
+using OpenTK.Input;
 using Solid.Layout;
 using Solid.UI.Skinning;
 using System;
@@ -16,6 +18,93 @@ namespace Solid.UI
 
 		public static readonly SolidProperty BackgroundProperty = SolidProperty.Register<UIWidget, string>(nameof(Background));
 
+		public static readonly SolidProperty IsTouchableProperty = SolidProperty.Register<UIWidget, bool>(nameof(IsTouchable), new SolidPropertyMetadata()
+		{
+			DefaultValue = true,
+			InheritFromHierarchy = true,
+		});
+
+		public event EventHandler<KeyboardKeyEventArgs> KeyDown;
+		public event EventHandler<KeyPressEventArgs> KeyPress;
+		public event EventHandler<KeyboardKeyEventArgs> KeyUp;
+
+		public event EventHandler<MouseEventArgs> MouseEnter;
+		public event EventHandler<MouseEventArgs> MouseLeave;
+		public event EventHandler<MouseButtonEventArgs> MouseDown;
+		public event EventHandler<MouseMoveEventArgs> MouseMove;
+		public event EventHandler<MouseButtonEventArgs> MouseUp;
+		public event EventHandler<MouseWheelEventArgs> MouseWheel;
+
+		private bool isHovered = false;
+
+		private bool isPressed = false;
+
+		#region Input Handling
+
+		protected internal void OnKeyDown(KeyboardKeyEventArgs e)
+		{
+			this.KeyDown?.Invoke(this, e);
+		}
+
+		protected internal void OnKeyPress(KeyPressEventArgs e)
+		{
+			this.KeyPress?.Invoke(this, e);
+		}
+
+		protected internal void OnKeyUp(KeyboardKeyEventArgs e)
+		{
+			this.KeyUp?.Invoke(this, e);
+		}
+		
+		protected internal void OnMouseEnter(MouseEventArgs e)
+		{
+			this.isHovered = true;
+			this.MouseEnter?.Invoke(this, e);
+		}
+
+		protected internal void OnMouseLeave(MouseEventArgs e)
+		{
+			this.isHovered = false;
+			this.isPressed = false;
+			this.MouseLeave?.Invoke(this, e);
+		}
+
+		protected internal void OnMouseDown(MouseButtonEventArgs e)
+		{
+			if (e.Button == MouseButton.Left)
+				this.isPressed = true;
+			this.MouseDown?.Invoke(this, e);
+		}
+
+		protected internal void OnMouseMove(MouseMoveEventArgs e)
+		{
+			this.MouseMove?.Invoke(this, e);
+		}
+
+		protected internal void OnMouseUp(MouseButtonEventArgs e)
+		{
+			if (e.Button == MouseButton.Left)
+				this.isPressed = false;
+			this.MouseUp?.Invoke(this, e);
+		}
+
+		protected internal void OnMouseWheel(MouseWheelEventArgs e)
+		{
+			this.MouseWheel?.Invoke(this, e);
+		}
+
+		#endregion
+
+		public void UpdateControlState()
+		{
+
+		}
+
+		protected virtual void OnUpdateControlState()
+		{
+
+		}
+
 		/// <summary>
 		/// Draws the widget.
 		/// </summary>
@@ -29,6 +118,15 @@ namespace Solid.UI
 				this.OnDrawPostChildren();
 		}
 
+		protected virtual StyleKey GetCurrentStyleKey()
+		{
+			if (this.isPressed)
+				return StyleKey.Active;
+			if (this.isHovered)
+				return StyleKey.Hovered;
+			return StyleKey.Default;
+		}
+
 		/// <summary>
 		/// Implements the widget specific draw routines.
 		/// </summary>
@@ -40,7 +138,7 @@ namespace Solid.UI
 			if (string.IsNullOrWhiteSpace(this.Background) == false)
 				key = this.Background;
 
-			g.RenderStyleBrush(key, StyleKey.Default, this.GetClientRectangle());
+			g.RenderStyleBrush(key, this.GetCurrentStyleKey(), this.GetClientRectangle());
 		}
 
 		protected virtual void OnDrawPostChildren()
@@ -48,7 +146,7 @@ namespace Solid.UI
 			var g = this.UserInterface;
 
 			if (string.IsNullOrWhiteSpace(this.Foreground) == false)
-				g.RenderStyleBrush(this.Foreground, StyleKey.Default, this.GetClientRectangle());
+				g.RenderStyleBrush(this.Foreground, this.GetCurrentStyleKey(), this.GetClientRectangle());
 		}
 
 		/// <summary>
@@ -60,9 +158,28 @@ namespace Solid.UI
 			this.Size.Width, this.Size.Height);
 
 		/// <summary>
+		/// Converts a point in interface coordinates to local coordinates.
+		/// </summary>
+		/// <param name="pt"></param>
+		/// <returns></returns>
+		public Point PointToClient(Point pt) => (pt - this.Position);
+
+		/// <summary>
+		/// Converts a point from local coordinates to interface coordinates.
+		/// </summary>
+		/// <param name="pt"></param>
+		/// <returns></returns>
+		public Point PointToInterface(Point pt) => (pt + this.Position);
+
+		/// <summary>
 		/// Gets the associated user interface.
 		/// </summary>
 		public UserInterface UserInterface { get; internal set; }
+
+		/// <summary>
+		/// Gets if the mouse hovers the control.
+		/// </summary>
+		public bool IsHovered => this.isHovered;
 
 		public string Background
 		{
@@ -74,6 +191,12 @@ namespace Solid.UI
 		{
 			get { return Get<string>(ForegroundProperty); }
 			set { Set(ForegroundProperty, value); }
+		}
+
+		public bool IsTouchable
+		{
+			get { return Get<bool>(IsTouchableProperty); }
+			set { Set(IsTouchableProperty, value); }
 		}
 	}
 }

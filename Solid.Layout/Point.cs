@@ -12,7 +12,11 @@
 
 		public static Point Add(Point lhs, Point rhs) => new Point(lhs.X + rhs.X, lhs.Y + rhs.Y);
 
+		public static Point Subtract(Point lhs, Point rhs) => new Point(lhs.X - rhs.X, lhs.Y - rhs.Y);
+
 		public static Point operator +(Point lhs, Point rhs) => Add(lhs, rhs);
+
+		public static Point operator -(Point lhs, Point rhs) => Subtract(lhs, rhs);
 
 		public override string ToString()
 		{

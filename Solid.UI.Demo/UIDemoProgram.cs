@@ -34,6 +34,8 @@ namespace Solid.UI.Demo
 				GraphicsContextFlags.Debug | GraphicsContextFlags.ForwardCompatible)
 		{
 			this.ui = UserInterface.Load("userinterface.sml");
+			this.ui.Input = new GameWindowInput(this);
+			// this.ui.ViewModel = new GameViewModel();
 		}
 
 		protected override void OnLoad(EventArgs e)
