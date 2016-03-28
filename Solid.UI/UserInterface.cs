@@ -25,6 +25,7 @@ namespace Solid.UI
 		
 		public UserInterface()
 		{
+
 		}	
 
 		public object ViewModel

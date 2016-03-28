@@ -25,6 +25,7 @@ namespace Solid.UI
 			mapper.RegisterConverter<Rectangle, RectangleConverter>();
 			mapper.RegisterConverter<Face, FaceConverter>();
 			mapper.RegisterConverter<Color4, Color4Converter>();
+			mapper.RegisterConverter<Texture, TextureConverter>();
 		}
 
 		public UIMapper()
@@ -34,6 +35,7 @@ namespace Solid.UI
 			this.RegisterType<Panel>();
 			this.RegisterType<Button>();
 			this.RegisterType<Label>();
+			this.RegisterType<Image>();
 		}
 
 		protected override Widget CreateNode(string nodeClass)

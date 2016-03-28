@@ -61,6 +61,7 @@
     <Compile Include="FaceConverter.cs" />
     <Compile Include="FontTextureBrush.cs" />
     <Compile Include="GameWindowInput.cs" />
+    <Compile Include="Image.cs" />
     <Compile Include="Label.cs" />
     <Compile Include="Panel.cs" />
     <Compile Include="Rectangle.cs" />
@@ -78,6 +79,7 @@
     <Compile Include="Texture.cs" />
     <Compile Include="TextureBrush.cs" />
     <Compile Include="InputSource.cs" />
+    <Compile Include="TextureConverter.cs" />
     <Compile Include="UIMapper.cs" />
     <Compile Include="UIWidget.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

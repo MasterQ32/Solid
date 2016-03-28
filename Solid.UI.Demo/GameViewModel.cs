@@ -1,9 +1,9 @@
-﻿using System;
-using System.ComponentModel;
-
-namespace Solid.UI.Demo
+﻿namespace Solid.UI.Demo
 {
-	public sealed class GameViewModel : INotifyPropertyChanged
+	using System;
+	using System.ComponentModel;
+
+	public sealed class GameViewModel 
 	{
 		private string displayText = "";
 

@@ -16,16 +16,20 @@ uniform sampler2D uTexture;
 void main() {
 	color = texture2D(uTexture, uv);
 }";
-
-		private Texture texture;
-		private int textureLocation;
 		
-		public TextureBrush(Texture texture) :
+		private int textureLocation;
+
+		public TextureBrush() :
 			base(fragmentShaderSource)
+		{
+		}
+
+		public TextureBrush(Texture texture) :
+			this()
 		{
 			if (texture == null)
 				throw new ArgumentNullException(nameof(texture));
-			this.texture = texture;
+			this.Texture = texture;
 		}
 
 		protected override void OnCompiled()
@@ -38,8 +42,13 @@ void main() {
 		{
 			base.Setup();
 			GL.ActiveTexture(TextureUnit.Texture0);
-			this.texture.Bind();
+			this.Texture.Bind();
 			GL.Uniform1(this.textureLocation, 0);
+		}
+
+		public Texture Texture
+		{
+			get; set;
 		}
 	}
 }

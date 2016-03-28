@@ -39,13 +39,13 @@
 				}
 				
 				Button(Table.Row=3, Table.Column=0) {
-					Label(Text="*");
+					Image(VerticalAlignment=Center, HorizontalAlignment=Center, Source = "red_cross.png", IsTouchable=False);
 				}
 				Button(Table.Row=3, Table.Column=1, Click=[Input0]) {
 					Label(Text="0");
 				}
 				Button(Table.Row=3, Table.Column=2) {
-					Label(Text="#");
+					Image(VerticalAlignment=Center, HorizontalAlignment=Center, Source = "green_checkmark.png", IsTouchable=False);
 				}
 			}
 		}
