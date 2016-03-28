@@ -67,9 +67,6 @@ namespace Solid.UI
 		{
 			this.BeginDraw();
 			this.Draw(this.Root);
-
-			// this.RenderString("Hello RenderString()\nHello newline", new Rectangle(16, 16, 100, 100), this.font, 32, false);
-
 			this.EndDraw();
 		}
 

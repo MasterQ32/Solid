@@ -6,12 +6,11 @@
 	using System;
 	public class Label : UIWidget
 	{
-		
 		public static SolidProperty TextProperty = SolidProperty.Register<Label, string>(nameof(Text), "");
 
 		public static SolidProperty FontProperty = SolidProperty.Register<Label, string>(nameof(Font), new SolidPropertyMetadata()
 		{
-			DefaultValue = "Font",
+			DefaultValue = "Label",
 			InheritFromHierarchy = true,
 		});
 

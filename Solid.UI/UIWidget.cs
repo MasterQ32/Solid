@@ -26,6 +26,32 @@ namespace Solid.UI
 
 		public static readonly SolidProperty ClickCommandProperty = SolidProperty.Register<UIWidget, Command>("Click");
 
+		private static void ExtendDefaultGen(SolidProperty property, Func<Style,object> getValue)
+		{
+			// Overrides the property defaults of some properties so the style can define the default value.
+			var prevGen = property.Metadata.DefaultGenerator;
+			property.Metadata.DefaultGenerator = (obj, prop) =>
+			{
+				if (obj is UIWidget)
+				{
+					var widget = (UIWidget)obj;
+					var style = widget.UserInterface?.Skin[widget.GetType().Name];
+					if(style != null)
+						return getValue(style);
+				}
+				return prevGen(obj, prop);
+			};
+		}
+
+		static UIWidget()
+		{
+			ExtendDefaultGen(MarginProperty, (style) => style.Margin);
+			ExtendDefaultGen(PaddingProperty, (style) => style.Padding);
+			ExtendDefaultGen(HorizontalAlignmentProperty, (style) => style.HorizontalAlignment);
+			ExtendDefaultGen(VerticalAlignmentProperty, (style) => style.VerticalAlignment);
+			ExtendDefaultGen(DeclaredSizeProperty, (style) => style.Size);
+		}
+
 		public event EventHandler<KeyboardKeyEventArgs> KeyDown;
 		public event EventHandler<KeyPressEventArgs> KeyPress;
 		public event EventHandler<KeyboardKeyEventArgs> KeyUp;

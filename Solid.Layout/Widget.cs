@@ -334,7 +334,7 @@ namespace Solid.Layout
 
 		#region Solid Properties
 
-		public static readonly SolidProperty DeclaredSizeProperty = SolidProperty.Register<Widget, Size>(nameof(DeclaredSize));
+		public static readonly SolidProperty DeclaredSizeProperty = SolidProperty.Register<Widget, Size>("Size");
 
 		public static readonly SolidProperty MarginProperty = SolidProperty.Register<Widget, Thickness>(nameof(Margin));
 

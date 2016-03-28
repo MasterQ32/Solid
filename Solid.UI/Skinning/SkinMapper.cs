@@ -1,5 +1,6 @@
 ﻿using OpenTK.Graphics;
 using SharpFont;
+using Solid.Layout;
 using Solid.Markup;
 using System;
 using System.Collections.Generic;
@@ -20,9 +21,8 @@ namespace Solid.UI.Skinning
 			this.RegisterType<SolidBrushDescriptor>("Color");
 			this.RegisterType<TextureBoxBrushDescriptor>("TextureBox");
 
-			this.RegisterConverter<Color4, Color4Converter>();
-			this.RegisterConverter<Rectangle, RectangleConverter>();
-			this.RegisterConverter<Face, FaceConverter>();
+			this.RegisterConverter<Thickness, ThicknessConverter>();
+			UIMapper.RegisterConverters(this);
 		}
 
 		protected override IMarkupDocument<SolidObject> CreateDocument() => new Document();

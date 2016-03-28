@@ -232,7 +232,7 @@ namespace Solid.Test
 
 		class ChildContainer
 		{
-			public List<ChildContainer> children;
+			public List<ChildContainer> children = new List<ChildContainer>();
 
 			public void Add(ChildContainer child) => this.children.Add(child);
 		}

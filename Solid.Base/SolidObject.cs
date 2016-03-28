@@ -140,7 +140,7 @@ namespace Solid
 							parent = parent.Parent;
 						}
 					}
-					return this.property.Metadata.DefaultValue;
+					return this.property.Metadata.DefaultGenerator(this.target, this.property);
 				}
 				set
 				{

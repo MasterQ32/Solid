@@ -16,13 +16,20 @@ namespace Solid.UI
 	{
 		protected override IMarkupDocument<Widget> CreateDocument() => new UserInterface();
 
+		public static void RegisterConverters<T>(MarkupMapper<T> mapper)
+			where T : class
+		{
+			mapper.RegisterConverter<Color, ColorConverter>();
+			mapper.RegisterConverter<Brush, BrushConverter>();
+			mapper.RegisterConverter<Skin, SkinConverter>();
+			mapper.RegisterConverter<Rectangle, RectangleConverter>();
+			mapper.RegisterConverter<Face, FaceConverter>();
+			mapper.RegisterConverter<Color4, Color4Converter>();
+		}
+
 		public UIMapper()
 		{
-			this.RegisterConverter<Color, ColorConverter>();
-			this.RegisterConverter<Brush, BrushConverter>();
-			this.RegisterConverter<Skin, SkinConverter>();
-			this.RegisterConverter<Rectangle, RectangleConverter>();
-			this.RegisterConverter<Face, FaceConverter>();
+			RegisterConverters(this);
 
 			this.RegisterType<Panel>();
 			this.RegisterType<Button>();

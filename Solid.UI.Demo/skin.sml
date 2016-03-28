@@ -1,11 +1,11 @@
 Skin
 {
-	Button : Style {
+	Button : Style(Width=48, Height=48, Padding="4;0;0;10") {
 		Default : Texture(Source = "button-normal.png");
 		Hovered : Texture(Source = "button-hovered.png");
 		Active  : Texture(Source = "button-clicked.png");
 	}
-	Font : Style(Font="kenvector_future.ttf", FontSize=24, FontColor=Black);
+	Label : Style(Font="kenvector_future.ttf", FontSize=24, FontColor=Black);
 	Panel : Style {
 		Default : TextureBox(EdgeWidth = 10) {
 			TopLeft      : Texture(Source = "panel.png", Rect = "0;0;10;10");
@@ -20,8 +20,5 @@ Skin
 			
 			Center       : Texture(Source = "panel.png", Rect = "10;10;80;80");
 		}
-	}
-	Crosshair : Style {
-		Default : Texture(Source = "red_cross.png");
 	}
 }
