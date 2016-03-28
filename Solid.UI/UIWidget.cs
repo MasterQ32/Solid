@@ -24,6 +24,8 @@ namespace Solid.UI
 			InheritFromHierarchy = true,
 		});
 
+		public static readonly SolidProperty ClickCommandProperty = SolidProperty.Register<UIWidget, Command>("Click");
+
 		public event EventHandler<KeyboardKeyEventArgs> KeyDown;
 		public event EventHandler<KeyPressEventArgs> KeyPress;
 		public event EventHandler<KeyboardKeyEventArgs> KeyUp;
@@ -84,7 +86,10 @@ namespace Solid.UI
 		protected internal void OnMouseUp(MouseButtonEventArgs e)
 		{
 			if (e.Button == MouseButton.Left)
+			{
 				this.isPressed = false;
+				this.ClickCommand?.Execute();
+			}
 			this.MouseUp?.Invoke(this, e);
 		}
 
@@ -181,22 +186,40 @@ namespace Solid.UI
 		/// </summary>
 		public bool IsHovered => this.isHovered;
 
+		/// <summary>
+		/// Gets or sets the background skin.
+		/// </summary>
 		public string Background
 		{
 			get { return Get<string>(BackgroundProperty); }
 			set { Set(BackgroundProperty, value); }
 		}
 
+		/// <summary>
+		/// Gets or sets the foreground skin.
+		/// </summary>
 		public string Foreground
 		{
 			get { return Get<string>(ForegroundProperty); }
 			set { Set(ForegroundProperty, value); }
 		}
 
+		/// <summary>
+		/// Gets or sets the the element receives UI events.
+		/// </summary>
 		public bool IsTouchable
 		{
 			get { return Get<bool>(IsTouchableProperty); }
 			set { Set(IsTouchableProperty, value); }
+		}
+
+		/// <summary>
+		/// Gets or sets the command that is executed on click.
+		/// </summary>
+		public Command ClickCommand
+		{
+			get { return Get<Command>(ClickCommandProperty); }
+			set { Set(ClickCommandProperty, value); }
 		}
 	}
 }

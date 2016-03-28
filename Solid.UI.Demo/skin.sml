@@ -5,6 +5,7 @@ Skin
 		Hovered : Texture(Source = "button-hovered.png");
 		Active  : Texture(Source = "button-clicked.png");
 	}
+	Font : Style(Font="kenvector_future.ttf", FontSize=24, FontColor=Black);
 	Panel : Style {
 		Default : TextureBox(EdgeWidth = 10) {
 			TopLeft      : Texture(Source = "panel.png", Rect = "0;0;10;10");

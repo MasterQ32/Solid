@@ -26,7 +26,7 @@ namespace Solid.Layout
 				{
 					case 1: return new Thickness(items[0]);
 					case 2: return new Thickness(items[0], items[1]);
-					case 3: return new Thickness(items[0], items[2], items[1], items[3]);
+					case 4: return new Thickness(items[0], items[2], items[1], items[3]);
 					default: throw new NotSupportedException($"{items.Length} is not a valid number of items for a thickness."); 
 				}
 			}

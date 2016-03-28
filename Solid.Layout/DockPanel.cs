@@ -54,6 +54,9 @@ namespace Solid.Layout
 				if (modifyX) size.Width = Max(size.Width, minSize.Width);
 				if (modifyY) size.Height = Max(size.Height, minSize.Height);
 
+				size.Width += this.Padding.Left + this.Padding.Right;
+				size.Height += this.Padding.Top + this.Padding.Bottom;
+
 				return size;
 			}
 		}
@@ -64,8 +67,8 @@ namespace Solid.Layout
 			if (this.Children.Count == 0)
 				return;
 
-			Point position = new Point(0, 0);
-			Size size = this.Size;
+			Point position = this.ClientPosition;
+			Size size = this.ClientSize;
 
 			for (int i = 0; i < this.Children.Count - 1; i++)
 			{

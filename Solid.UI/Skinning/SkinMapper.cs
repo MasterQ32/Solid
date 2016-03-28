@@ -1,4 +1,5 @@
 ﻿using OpenTK.Graphics;
+using SharpFont;
 using Solid.Markup;
 using System;
 using System.Collections.Generic;
@@ -21,6 +22,7 @@ namespace Solid.UI.Skinning
 
 			this.RegisterConverter<Color4, Color4Converter>();
 			this.RegisterConverter<Rectangle, RectangleConverter>();
+			this.RegisterConverter<Face, FaceConverter>();
 		}
 
 		protected override IMarkupDocument<SolidObject> CreateDocument() => new Document();

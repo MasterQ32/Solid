@@ -24,7 +24,7 @@
 
 				Size cellSize = new Size(0, 0);
 
-				foreach(var child in this.Children)
+				foreach (var child in this.Children)
 				{
 					var ws = child.WidgetSize;
 					cellSize.Width = Max(cellSize.Width, ws.Width);
@@ -40,6 +40,9 @@
 					size.Height = this.Rows * cellSize.Height;
 				}
 
+				size.Width += this.Columns * (this.Padding.Left + this.Padding.Right);
+				size.Height += this.Rows * (this.Padding.Top + this.Padding.Bottom);
+
 				return size;
 			}
 		}
@@ -50,8 +53,10 @@
 			if (this.Children.Count == 0)
 				return;
 
-			var cellSize = new Size(this.Size.Width / this.Columns, this.Size.Height / this.Rows);
-			foreach(var child in this.Children)
+			var cellSize = new Size(
+				this.Size.Width / this.Columns, 
+				this.Size.Height / this.Rows);
+			foreach (var child in this.Children)
 			{
 				var c = ColumnProperty.GetValue<int>(child);
 				var r = RowProperty.GetValue<int>(child);
@@ -60,10 +65,14 @@
 				if (r >= this.Rows) continue;
 
 				var cellPosition = new Point(
-					c * cellSize.Width,
-					r * cellSize.Height);
+					c * cellSize.Width + this.Padding.Left,
+					r * cellSize.Height + this.Padding.Top);
 
-				child.ApplyAlignment(cellPosition, cellSize);
+				var cellInternalSize = new Size(
+					cellSize.Width - this.Padding.Horizontal,
+					cellSize.Height - this.Padding.Horizontal);
+
+				child.ApplyAlignment(cellPosition, cellInternalSize);
 				child.SetupLayout();
 			}
 		}

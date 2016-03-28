@@ -8,7 +8,7 @@ namespace Solid.UI
 	{
 		private readonly int id;
 
-		private Texture()
+		public Texture()
 		{
 			this.id = GL.GenTexture();
 
@@ -23,30 +23,41 @@ namespace Solid.UI
 		public Texture(Bitmap source) :
 			this()
 		{
-			GL.BindTexture(TextureTarget.Texture2D, this.id);
-
 			var data = source.LockBits(
 				new System.Drawing.Rectangle(0, 0, source.Width, source.Height),
 				System.Drawing.Imaging.ImageLockMode.ReadOnly,
 				System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-			GL.TexImage2D(
-				TextureTarget.Texture2D,
-				0,
-				PixelInternalFormat.Rgba,
-				source.Width, source.Height,
-				0,
-				PixelFormat.Bgra,
-				PixelType.UnsignedByte,
-				data.Scan0);
+			this.Load(source.Width, source.Height, PixelInternalFormat.Rgba, PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
 			source.UnlockBits(data);
-			this.Width = source.Width;
-			this.Height = source.Height;
 		}
 
 		public Texture(string fileName) :
 			this(new Bitmap(fileName))
 		{
 
+		}
+
+		public void Load(
+			int width,
+			int height,
+			PixelInternalFormat internalFormat,
+			PixelFormat format, 
+			PixelType type, 
+			IntPtr scan0)
+		{
+			GL.BindTexture(TextureTarget.Texture2D, this.id);
+			GL.TexImage2D(
+				TextureTarget.Texture2D,
+				0,
+				internalFormat,
+				width, height,
+				0,
+				format,
+				PixelType.UnsignedByte,
+				scan0);
+			this.Width = width;
+			this.Height = height;
+			GL.BindTexture(TextureTarget.Texture2D, 0);
 		}
 
 		public void Bind()

@@ -12,11 +12,13 @@
 			get
 			{
 				var minSize = new Size();
-				foreach(var child in this.Children)
+				foreach (var child in this.Children)
 				{
 					minSize.Width = Max(minSize.Width, LeftProperty.GetValue<float>(child) + child.WidgetSize.Width);
 					minSize.Height = Max(minSize.Height, TopProperty.GetValue<float>(child) + child.WidgetSize.Height);
 				}
+				minSize.Width += this.Padding.Left + this.Padding.Right;
+				minSize.Height += this.Padding.Top + this.Padding.Bottom;
 				return minSize;
 			}
 		}
@@ -26,8 +28,8 @@
 			foreach (var child in this.Children)
 			{
 				var position = new Point(
-					LeftProperty.GetValue<float>(child),
-					TopProperty.GetValue<float>(child));
+					LeftProperty.GetValue<float>(child) + this.Padding.Left,
+					TopProperty.GetValue<float>(child) + this.Padding.Top);
 				var size = child.WidgetSize;
 
 				child.ApplyAlignment(position, size);

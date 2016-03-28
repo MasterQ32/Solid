@@ -2,9 +2,17 @@
 {
 	using System;
 	using Solid.Markup;
-
+	using OpenTK.Graphics;
+	using SharpFont;
 	public class Style : SolidObject, INamedNodeContainer
 	{
+
+		public static SolidProperty FontProperty = SolidProperty.Register<Style, Face>(nameof(Font));
+
+		public static SolidProperty FontSizeProperty = SolidProperty.Register<Style, int>(nameof(FontSize), 16);
+
+		public static SolidProperty FontColorProperty = SolidProperty.Register<Style, Color4>(nameof(FontColor), Color4.Black);
+
 		public Brush Default { get; set; }
 
 		public Brush Hovered { get; set; }
@@ -62,6 +70,24 @@
 		public void SetChildNodeName(object child, string name)
 		{
 			throw new NotImplementedException();
+		}
+
+		public Face Font
+		{
+			get { return Get<Face>(FontProperty); }
+			set { Set(FontProperty, value); }
+		}
+
+		public int FontSize
+		{
+			get { return Get<int>(FontSizeProperty); }
+			set { Set(FontSizeProperty, value); }
+		}
+
+		public Color4 FontColor
+		{
+			get { return Get<Color4>(FontColorProperty); }
+			set { Set(FontColorProperty, value); }
 		}
 	}
 

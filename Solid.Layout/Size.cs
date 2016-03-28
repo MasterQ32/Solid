@@ -10,6 +10,8 @@
 			this.Height = height;
 		}
 
+		public static Size Empty { get; } = new Size(0, 0);
+
 		public override string ToString()
 		{
 			return $"{this.Width} × {this.Height}";

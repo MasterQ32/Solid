@@ -21,7 +21,7 @@ namespace Solid.Layout
 		{
 			this.children = new WidgetChildCollection(this);
 		}
-		
+
 		public Widget Parent
 		{
 			get { return this.parent; }
@@ -51,10 +51,9 @@ namespace Solid.Layout
 
 		protected virtual void OnLayout()
 		{
-			Size size = this.Size;
 			foreach (var child in this.Children)
 			{
-				child.ApplyAlignment(new Point(0, 0), size);
+				child.ApplyAlignment(this.ClientPosition, this.ClientSize);
 				child.SetupLayout();
 			}
 		}
@@ -76,9 +75,25 @@ namespace Solid.Layout
 					if (modX) size.Width = Max(size.Width, csize.Width);
 					if (modY) size.Height = Max(size.Height, csize.Height);
 				}
+				if (modX) size.Width += this.Padding.Horizontal;
+				if (modY) size.Height += this.Padding.Vertical;
 				return size;
 			}
 		}
+
+		/// <summary>
+		/// Gets the position of the child area in local space.
+		/// </summary>
+		public Point ClientPosition => new Point(
+			this.Padding.Left,
+			this.Padding.Top);
+
+		/// <summary>
+		/// Gets the size of the child area.
+		/// </summary>
+		public Size ClientSize => new Size(
+			this.Size.Width - this.Padding.Left - this.Padding.Right,
+			this.Size.Height - this.Padding.Top - this.Padding.Bottom);
 
 
 		/// <summary>
@@ -323,6 +338,8 @@ namespace Solid.Layout
 
 		public static readonly SolidProperty MarginProperty = SolidProperty.Register<Widget, Thickness>(nameof(Margin));
 
+		public static readonly SolidProperty PaddingProperty = SolidProperty.Register<Widget, Thickness>(nameof(Padding));
+
 		public static readonly SolidProperty VerticalAlignmentProperty = SolidProperty.Register<Widget, VerticalAlignment>(nameof(VerticalAlignment));
 
 		public static readonly SolidProperty HorizontalAlignmentProperty = SolidProperty.Register<Widget, HorizontalAlignment>(nameof(HorizontalAlignment));
@@ -374,6 +391,15 @@ namespace Solid.Layout
 			set { Set(MarginProperty, value); }
 		}
 
+		/// <summary>
+		/// Gets or sets the widgets paddings.
+		/// </summary>
+		public Thickness Padding
+		{
+			get { return Get<Thickness>(PaddingProperty); }
+			set { Set(PaddingProperty, value); }
+		}
+
 		#endregion
 
 		#region WidgetChildCollection
@@ -391,7 +417,7 @@ namespace Solid.Layout
 			private bool IsValidChild(Widget child)
 			{
 				var it = this.widget;
-				while(it != null)
+				while (it != null)
 				{
 					if (it == child)
 						return false;
@@ -404,7 +430,7 @@ namespace Solid.Layout
 			{
 				if (child == null)
 					throw new ArgumentNullException();
-				if(IsValidChild(child) == false)
+				if (IsValidChild(child) == false)
 					throw new InvalidOperationException("Cannot assign value, a circular reference would be created.");
 			}
 

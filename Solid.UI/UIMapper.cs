@@ -8,6 +8,7 @@ using Solid.Markup;
 using OpenTK.Graphics;
 using System.Drawing;
 using Solid.UI.Skinning;
+using SharpFont;
 
 namespace Solid.UI
 {
@@ -21,9 +22,11 @@ namespace Solid.UI
 			this.RegisterConverter<Brush, BrushConverter>();
 			this.RegisterConverter<Skin, SkinConverter>();
 			this.RegisterConverter<Rectangle, RectangleConverter>();
+			this.RegisterConverter<Face, FaceConverter>();
 
 			this.RegisterType<Panel>();
 			this.RegisterType<Button>();
+			this.RegisterType<Label>();
 		}
 
 		protected override Widget CreateNode(string nodeClass)

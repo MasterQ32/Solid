@@ -17,12 +17,12 @@ namespace Solid.Layout
 			if (this.Direction == StackDirection.Vertical)
 			{
 				float offset = 0;
-				Size size = new Size(this.Size.Width, 0);
+				Size size = new Size(this.ClientSize.Width, 0);
 				foreach (Widget child in this.Children)
 				{
 					size.Height = child.WidgetSize.Height;
 
-					child.ApplyAlignment(new Point(0, offset), size);
+					child.ApplyAlignment(new Point(this.Padding.Left, this.Padding.Top + offset), size);
 
 					offset += size.Height;
 					child.SetupLayout();
@@ -31,12 +31,12 @@ namespace Solid.Layout
 			else
 			{
 				float offset = 0;
-				Size size = new Size(0, this.Size.Height);
+				Size size = new Size(0, this.ClientSize.Height);
 				foreach (Widget child in this.Children)
 				{
 					size.Width = child.WidgetSize.Width;
 
-					child.ApplyAlignment(new Point(offset, 0), size);
+					child.ApplyAlignment(new Point(this.Padding.Left + offset, this.Padding.Top), size);
 
 					offset += size.Width;
 					child.SetupLayout();
@@ -69,6 +69,9 @@ namespace Solid.Layout
 						if (modifyY) size.Height = Max(size.Height, s.Height);
 					}
 				}
+
+				if (modifyX) size.Width += this.Padding.Left + this.Padding.Right;
+				if (modifyY) size.Height += this.Padding.Top + this.Padding.Bottom;
 				return size;
 			}
 		}

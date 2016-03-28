@@ -23,5 +23,15 @@
 			this.Top = top;
 			this.Bottom = bottom;
 		}
+
+		/// <summary>
+		/// Gets the total padding in vertical direction (Top + Bottom)
+		/// </summary>
+		public float Vertical => this.Top + this.Bottom;
+
+		/// <summary>
+		/// Gets the total padding in horizontal direction (Left + Right)
+		/// </summary>
+		public float Horizontal => this.Left + this.Right;
 	}
 }

@@ -5,11 +5,14 @@ using System;
 using OpenTK.Graphics;
 using Solid.UI.Skinning;
 using OpenTK.Input;
+using SharpFont;
 
 namespace Solid.UI
 {
 	public class UserInterface : LayoutDocument
 	{
+		public static readonly Library FontLibrary = new Library();
+
 		private int vertexArray;
 		private int vertexBuffer;
 
@@ -17,6 +20,12 @@ namespace Solid.UI
 		private InputSource input;
 
 		private UIWidget currentMouseWidget;
+		
+		private FontTextureBrush fontBrush;
+		
+		public UserInterface()
+		{
+		}	
 
 		protected override void OnNodeCreation(Widget node)
 		{
@@ -58,6 +67,9 @@ namespace Solid.UI
 		{
 			this.BeginDraw();
 			this.Draw(this.Root);
+
+			// this.RenderString("Hello RenderString()\nHello newline", new Rectangle(16, 16, 100, 100), this.font, 32, false);
+
 			this.EndDraw();
 		}
 
@@ -77,6 +89,68 @@ namespace Solid.UI
 			GL.Disable(EnableCap.Blend);
 			GL.BindVertexArray(0);
 			GL.UseProgram(0);
+		}
+
+		public Rectangle RenderString(
+			string text, 
+			Rectangle area, 
+			string styleName,
+			bool onlyMeasureFont = false)
+		{
+			var style = this.Skin[styleName];
+
+			Point cursor = new Point(0.0f, 0.0f);
+			Rectangle resultingSize = new Rectangle(area.Position, new Size(0, style.FontSize));
+
+			style.Font.SetPixelSizes(0, (uint)style.FontSize);
+
+			for (int i = 0; i < text.Length; i++)
+			{
+				var c = text[i];
+
+				switch (c)
+				{
+					case '\r': break;
+					case '\n':
+					{
+						cursor.X = 0.0f;
+						cursor.Y += style.FontSize;
+						resultingSize.Height += style.FontSize;
+						break;
+					}
+					default:
+					{
+
+						if (onlyMeasureFont)
+							style.Font.LoadChar(c, LoadFlags.Default, LoadTarget.Normal);
+						else
+							style.Font.LoadChar(c, LoadFlags.Render, LoadTarget.Normal);
+
+						var glyph = style.Font.Glyph;
+						var bitmap = glyph.Bitmap;
+
+						if (onlyMeasureFont == false)
+						{
+							GL.PixelStore(PixelStoreParameter.UnpackAlignment, 1);
+							this.fontBrush.Texture.Load(bitmap.Width, bitmap.Rows, (PixelInternalFormat)PixelFormat.Red, PixelFormat.Red, PixelType.UnsignedByte, bitmap.Buffer);
+							this.RenderBrush(
+								this.fontBrush,
+								new Rectangle(
+									area.X + cursor.X + glyph.BitmapLeft,
+									area.Y + cursor.Y + style.FontSize - glyph.BitmapTop,
+									bitmap.Width,
+									bitmap.Rows));
+						}
+
+						cursor.X += glyph.Advance.X.ToSingle();
+						cursor.Y += glyph.Advance.Y.ToSingle();
+
+						resultingSize.Width = Math.Max(resultingSize.Width, cursor.X);
+						break;
+					}
+				}
+			}
+			return resultingSize;
 		}
 
 		public void RenderBrush(Brush brush, Rectangle area)
@@ -154,7 +228,7 @@ namespace Solid.UI
 			GL.BindVertexArray(0);
 			GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
 
-
+			this.fontBrush = new FontTextureBrush();
 		}
 
 		private void BindInput()
