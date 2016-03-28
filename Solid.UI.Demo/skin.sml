@@ -1,6 +1,6 @@
 Skin
 {
-	Button : Style(Width=48, Height=48, Padding="4;0;0;10") {
+	Button : Style(Width=48, Height=48, Padding="0;0;0;10") {
 		Default : Texture(Source = "button-normal.png");
 		Hovered : Texture(Source = "button-hovered.png");
 		Active  : Texture(Source = "button-clicked.png");

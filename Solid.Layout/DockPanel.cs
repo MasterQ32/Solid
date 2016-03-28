@@ -54,8 +54,8 @@ namespace Solid.Layout
 				if (modifyX) size.Width = Max(size.Width, minSize.Width);
 				if (modifyY) size.Height = Max(size.Height, minSize.Height);
 
-				size.Width += this.Padding.Left + this.Padding.Right;
-				size.Height += this.Padding.Top + this.Padding.Bottom;
+				if (modifyX) size.Width += this.Padding.Left + this.Padding.Right;
+				if (modifyY) size.Height += this.Padding.Top + this.Padding.Bottom;
 
 				return size;
 			}
@@ -80,27 +80,27 @@ namespace Solid.Layout
 					case DockStyle.Left:
 					{
 						child.ApplyAlignment(position, new Size(childSize.Width, size.Height));
-						position.X += child.Size.Width;
-						size.Width -= child.Size.Width;
+						position.X += childSize.Width;
+						size.Width -= childSize.Width;
 						break;
 					}
 					case DockStyle.Right:
 					{
 						child.ApplyAlignment(new Point(position.X + size.Width - childSize.Width, position.Y), new Size(childSize.Width, size.Height));
-						size.Width -= child.Size.Width;
+						size.Width -= childSize.Width;
 						break;
 					}
 					case DockStyle.Top:
 					{
 						child.ApplyAlignment(position, new Size(size.Width, childSize.Height));
-						position.Y += child.Size.Height;
-						size.Height -= child.Size.Height;
+						position.Y += childSize.Height;
+						size.Height -= childSize.Height;
 						break;
 					}
 					case DockStyle.Bottom:
 					{
 						child.ApplyAlignment(new Point(position.X, position.Y + size.Height - childSize.Height), new Size(size.Width, childSize.Height));
-						size.Height -= child.Size.Height;
+						size.Height -= childSize.Height;
 						break;
 					}
 				}

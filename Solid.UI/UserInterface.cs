@@ -100,7 +100,7 @@ namespace Solid.UI
 			Rectangle resultingSize = new Rectangle(area.Position, new Size(0, style.FontSize));
 
 			style.Font.SetPixelSizes(0, (uint)style.FontSize);
-
+			
 			for (int i = 0; i < text.Length; i++)
 			{
 				var c = text[i];
@@ -129,6 +129,7 @@ namespace Solid.UI
 						if (onlyMeasureFont == false)
 						{
 							GL.PixelStore(PixelStoreParameter.UnpackAlignment, 1);
+							this.fontBrush.Color = style.FontColor;
 							this.fontBrush.Texture.Load(bitmap.Width, bitmap.Rows, (PixelInternalFormat)PixelFormat.Red, PixelFormat.Red, PixelType.UnsignedByte, bitmap.Buffer);
 							this.RenderBrush(
 								this.fontBrush,
@@ -138,11 +139,11 @@ namespace Solid.UI
 									bitmap.Width,
 									bitmap.Rows));
 						}
+						
+						resultingSize.Width = Math.Max(resultingSize.Width, cursor.X + glyph.Metrics.Width.ToSingle());
 
 						cursor.X += glyph.Advance.X.ToSingle();
 						cursor.Y += glyph.Advance.Y.ToSingle();
-
-						resultingSize.Width = Math.Max(resultingSize.Width, cursor.X);
 						break;
 					}
 				}

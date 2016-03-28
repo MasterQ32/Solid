@@ -264,8 +264,8 @@ namespace Solid.Layout
 			actualPosition.X += margin.Left;
 			actualPosition.Y += margin.Top;
 
-			actualSize.Width -= margin.Left + margin.Right;
-			actualSize.Height -= margin.Top + margin.Bottom;
+			actualSize.Width -= margin.Horizontal;
+			actualSize.Height -= margin.Vertical;
 
 			if (this.CanOverlap == false)
 			{
