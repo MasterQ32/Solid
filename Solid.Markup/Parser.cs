@@ -71,13 +71,6 @@ namespace Solid.Markup
 				ID = nodeName,
 			};
 
-			if (nodeName != null)
-			{
-				if (this.document[nodeName] != null)
-					throw new InvalidDataException("Duplicated node name.");
-				this.document[nodeName] = node;
-			}
-
 			var c = reader.Peek();
 			if (c == '(')
 			{

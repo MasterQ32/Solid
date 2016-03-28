@@ -38,37 +38,6 @@ namespace Solid.Test
 			AreEqual("Maria", root.children[1].Name);
 		}
 
-		enum TestEnumeration
-		{
-			Default,
-			First,
-			Second,
-		}
-
-		class PropertyTest
-		{
-			public byte Byte { get; set; }
-			public sbyte SByte { get; set; }
-			public short Short { get; set; }
-			public ushort UShort { get; set; }
-			public int Int { get; set; }
-			public uint UInt { get; set; }
-			public long Long { get; set; }
-			public ulong ULong { get; set; }
-			public float Float { get; set; }
-			public double Double { get; set; }
-			public decimal Decimal { get; set; }
-			public TestEnumeration Enum { get; set; }
-			public string String { get; set; }
-			public bool Boolean { get; set; }
-
-			// Special types:
-			public DateTime DateTime { get; set; }
-			public TimeSpan TimeSpan { get; set; }
-			public CultureInfo CultureInfo { get; set; }
-			public Guid Guid { get; set; }
-		}
-
 		[TestMethod]
 		public void TestPropertyMapping()
 		{
@@ -149,6 +118,57 @@ namespace Solid.Test
 			AreEqual(30, root.specials[0].Special);
 		}
 
+		public void TestNamedMapping()
+		{
+			var types = new TypeMapper();
+			types.Add("Container", typeof(ChildContainer));
+			types.Add("NamedContainer", typeof(NamedChildContainer));
+
+			var doc = Parser.Parse(
+@"Container {
+	a : Container;
+	b : NamedContainer {
+		c : Container;
+		d : Container {
+			e : Container;
+		}
+	}
+}");
+			var dict = new Dictionary<string, ChildContainer>();
+
+			var mapper = new NativeMapper(types);
+			mapper.EmitAllNamedNodes = true;
+			mapper.NamedNodeEmitted += (s, e) => dict.Add(e.Name, (ChildContainer)e.Node);
+
+			var root = (ChildContainer)mapper.Instantiate(doc);
+
+			AreEqual(2, root.children.Count);
+			AreEqual(0, root.children[0].children.Count);
+			AreEqual(2, root.children[1].children.Count);
+
+			IsInstanceOfType(root.children[1], typeof(NamedChildContainer));
+
+			AreEqual(0, root.children[1].children[0].children.Count);
+			AreEqual(1, root.children[1].children[1].children.Count);
+
+			IsInstanceOfType(root.children[1].children[0], typeof(NamedChildContainer));
+
+			AreEqual(1, root.children[1].children[1].children[0].children.Count);
+
+			AreEqual(2, dict.Count);
+			IsTrue(dict.ContainsKey("a"));
+			IsTrue(dict.ContainsKey("e"));
+			AreSame(root.children[0], dict["a"]);
+			AreSame(root.children[1].children[1].children[0], dict["e"]);
+
+			var b = (NamedChildContainer)root.children[1];
+			AreEqual(2, b.namedChildren.Count);
+			IsTrue(b.namedChildren.ContainsKey("b"));
+			IsTrue(b.namedChildren.ContainsKey("c"));
+			AreSame(b.children[0], b.namedChildren["b"]);
+			AreSame(b.children[1], b.namedChildren["c"]);
+		}
+
 		class RootType
 		{
 			public List<ChildType> children = new List<ChildType>();
@@ -177,6 +197,54 @@ namespace Solid.Test
 		class SpecialChildType : ChildType
 		{
 			public int Special { get; set; }
+		}
+
+		enum TestEnumeration
+		{
+			Default,
+			First,
+			Second,
+		}
+
+		class PropertyTest
+		{
+			public byte Byte { get; set; }
+			public sbyte SByte { get; set; }
+			public short Short { get; set; }
+			public ushort UShort { get; set; }
+			public int Int { get; set; }
+			public uint UInt { get; set; }
+			public long Long { get; set; }
+			public ulong ULong { get; set; }
+			public float Float { get; set; }
+			public double Double { get; set; }
+			public decimal Decimal { get; set; }
+			public TestEnumeration Enum { get; set; }
+			public string String { get; set; }
+			public bool Boolean { get; set; }
+
+			// Special types:
+			public DateTime DateTime { get; set; }
+			public TimeSpan TimeSpan { get; set; }
+			public CultureInfo CultureInfo { get; set; }
+			public Guid Guid { get; set; }
+		}
+
+		class ChildContainer
+		{
+			public List<ChildContainer> children;
+
+			public void Add(ChildContainer child) => this.children.Add(child);
+		}
+
+		class NamedChildContainer : ChildContainer, INamedNodeContainer<ChildContainer>
+		{
+			public Dictionary<string, ChildContainer> namedChildren = new Dictionary<string, ChildContainer>();
+
+			public void SetChildNodeName(ChildContainer child, string name)
+			{
+				namedChildren.Add(name, child);
+			}
 		}
 	}
 }

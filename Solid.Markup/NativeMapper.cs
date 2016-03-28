@@ -13,6 +13,12 @@ namespace Solid.Markup
 			this.types = types;
 		}
 
+		public bool EmitAllNamedNodes
+		{
+			get { return !this.SwallowsNamedNodeInDocument; }
+			set { this.SwallowsNamedNodeInDocument = !value; }
+		}
+
 		public object Instantiate(MarkupDocument document)
 		{
 			var doc = (StubDocument)this.Map(document);

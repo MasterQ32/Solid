@@ -314,17 +314,14 @@ namespace Solid.Test
 		}
 
 		[TestMethod]
-		public void TestNamedNodes()
+		public void TestNamedNodesWithoutContainer()
 		{
 			var doc = Parser.Parse("root : Root { child : Child; }");
 			IsNotNull(doc.Root);
 			var root = doc.Root;
 
-			IsNotNull(doc["root"]);
-			IsNotNull(doc["child"]);
-
-			AreSame(doc.Root, doc["root"]);
-			AreSame(doc.Root.Children[0], doc["child"]);
+			AreEqual("root", doc.Root.ID);
+			AreEqual("child", doc.Root.Children[0].ID);
 		}
 	}
 }

@@ -18,6 +18,17 @@ namespace Solid.Markup
 	{
 		private readonly Dictionary<Type, TypeConverter> converters = new Dictionary<Type, TypeConverter>();
 
+		private bool swallowsNamedNodeInDocument;
+
+		/// <summary>
+		/// Gets or sets if a named node will not be emitted to IMarkupDocument&lt;T&gt; when the node was registered in its INamedNodeContainer&lt;T&gt;.
+		/// </summary>
+		protected bool SwallowsNamedNodeInDocument
+		{
+			get { return this.swallowsNamedNodeInDocument; }
+			set { this.swallowsNamedNodeInDocument = value; }
+		}
+
 		protected MarkupMapper()
 		{
 			this.RegisterConverter<decimal, DecimalConverter>();
@@ -44,7 +55,7 @@ namespace Solid.Markup
 		protected abstract T CreateNode(string nodeClass);
 
 		protected abstract IMarkupDocument<T> CreateDocument();
-		
+
 		protected virtual void AddChildNode(T parent, T child)
 		{
 			var type = parent.GetType();
@@ -83,12 +94,12 @@ namespace Solid.Markup
 		{
 			var doc = CreateDocument();
 
-			doc.SetRoot(Map(doc, document.Root));
+			doc.SetRoot(Map(doc, document.Root, null));
 
 			return doc;
 		}
 
-		private T Map(IMarkupDocument<T> doc, MarkupNode node)
+		private T Map(IMarkupDocument<T> doc, MarkupNode node, T parent)
 		{
 			var obj = this.CreateNode(node.Type);
 			var type = obj.GetType();
@@ -106,12 +117,17 @@ namespace Solid.Markup
 
 			foreach (var child in node.Children)
 			{
-				var childInstance = Map(doc, child);
+				var childInstance = Map(doc, child, obj);
 
 				this.AddChildNode(obj, childInstance);
+
+				if ((child.ID != null) && (obj is INamedNodeContainer<T>))
+				{
+					((INamedNodeContainer<T>)obj).SetChildNodeName(childInstance, child.ID);
+				}
 			}
 
-			if (node.ID != null)
+			if ((node.ID != null) && (!(parent is INamedNodeContainer<T>) || !this.swallowsNamedNodeInDocument))
 				doc.SetNodeName(obj, node.ID);
 
 			doc.NotifyCreateNode(obj);
