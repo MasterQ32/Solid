@@ -3,10 +3,8 @@ using OpenTK.Graphics.OpenGL4;
 
 namespace Solid.UI
 {
-	public sealed class SolidBrush : Brush
+	public sealed class SolidBrush : RenderBrush
 	{
-		private int colorLocation;
-
 		static string fragmentShaderSource =
 @"#version 330 core
 
@@ -18,8 +16,16 @@ void main() {
 	color = uColor;
 }";
 
-		public SolidBrush(Color4 color) : 
+		private int colorLocation;
+
+		public SolidBrush() :
 			base(fragmentShaderSource)
+		{
+
+		}
+
+		public SolidBrush(Color4 color) :
+			this()
 		{
 			this.Color = color;
 		}
@@ -35,6 +41,6 @@ void main() {
 			GL.Uniform4(this.colorLocation, this.Color);
 		}
 
-		public Color4 Color { get; set; }
+		public Color4 Color { get; set; } = Color4.Magenta;
 	}
 }

@@ -1,8 +1,7 @@
 ﻿namespace Solid.Markup
 {
-	public interface INamedNodeContainer<T> 
-		where T : class
+	public interface INamedNodeContainer
 	{
-		void SetChildNodeName(T child, string name);
+		void SetChildNodeName(object child, string name);
 	}
 }

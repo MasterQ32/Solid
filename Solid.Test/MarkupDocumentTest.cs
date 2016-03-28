@@ -237,14 +237,15 @@ namespace Solid.Test
 			public void Add(ChildContainer child) => this.children.Add(child);
 		}
 
-		class NamedChildContainer : ChildContainer, INamedNodeContainer<ChildContainer>
+		class NamedChildContainer : ChildContainer, INamedNodeContainer
 		{
 			public Dictionary<string, ChildContainer> namedChildren = new Dictionary<string, ChildContainer>();
 
-			public void SetChildNodeName(ChildContainer child, string name)
+			public void SetChildNodeName(object child, string name)
 			{
-				namedChildren.Add(name, child);
+				namedChildren.Add(name, (ChildContainer)child);
 			}
+			
 		}
 	}
 }

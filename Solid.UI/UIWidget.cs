@@ -1,6 +1,7 @@
 ﻿using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 using Solid.Layout;
+using Solid.UI.Skinning;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,23 +12,9 @@ namespace Solid.UI
 {
 	public class UIWidget : Widget
 	{
-		public static readonly SolidProperty BackgroundProperty = SolidProperty.Register<UIWidget, Brush>(nameof(Background), new SolidPropertyMetadata()
-		{
-			DefaultValue = null,
-			InheritFromHierarchy = false,
-		});
+		public static readonly SolidProperty ForegroundProperty = SolidProperty.Register<UIWidget, string>(nameof(Foreground));
 
-		public static readonly SolidProperty ForegroundProperty = SolidProperty.Register<UIWidget, Brush>(nameof(Foreground), new SolidPropertyMetadata()
-		{
-			DefaultValue = new SolidBrush(Color4.Black),
-			InheritFromHierarchy = true,
-		});
-
-		public static readonly SolidProperty SkinProperty = SolidProperty.Register<UIWidget, Skin>(nameof(Skin), new SolidPropertyMetadata()
-		{
-			DefaultValue = null,
-			InheritFromHierarchy = true,
-		});
+		public static readonly SolidProperty BackgroundProperty = SolidProperty.Register<UIWidget, string>(nameof(Background));
 
 		/// <summary>
 		/// Draws the widget.
@@ -48,19 +35,20 @@ namespace Solid.UI
 		protected virtual void OnDrawPreChildren()
 		{
 			var g = this.UserInterface;
-			if (this.Background != null)
-			{
-				g.FillRectangle(this.GetClientRectangle(), this.Background);
-			}
+
+			var key = this.GetType().Name;
+			if (string.IsNullOrWhiteSpace(this.Background) == false)
+				key = this.Background;
+
+			g.RenderStyleBrush(key, StyleKey.Default, this.GetClientRectangle());
 		}
 
 		protected virtual void OnDrawPostChildren()
 		{
 			var g = this.UserInterface;
-			if (this.Background == null)
-			{
-				g.DrawBox(this.Skin, "Window", this.GetClientRectangle());
-			}
+
+			if (string.IsNullOrWhiteSpace(this.Foreground) == false)
+				g.RenderStyleBrush(this.Foreground, StyleKey.Default, this.GetClientRectangle());
 		}
 
 		/// <summary>
@@ -72,35 +60,20 @@ namespace Solid.UI
 			this.Size.Width, this.Size.Height);
 
 		/// <summary>
-		/// Gets or sets the background color of this widget.
-		/// </summary>
-		public Brush Background
-		{
-			get { return Get<Brush>(BackgroundProperty); }
-			set { Set(BackgroundProperty, value); }
-		}
-
-		/// <summary>
-		/// Gets or sets the foreground color of this widget.
-		/// </summary>
-		public Brush Foreground
-		{
-			get { return Get<Brush>(BackgroundProperty); }
-			set { Set(BackgroundProperty, value); }
-		}
-
-		/// <summary>
-		/// Gets or sets the skin of this widget.
-		/// </summary>
-		public Skin Skin
-		{
-			get { return Get<Skin>(SkinProperty); }
-			set { Set(SkinProperty, value); }
-		}
-
-		/// <summary>
 		/// Gets the associated user interface.
 		/// </summary>
 		public UserInterface UserInterface { get; internal set; }
+
+		public string Background
+		{
+			get { return Get<string>(BackgroundProperty); }
+			set { Set(BackgroundProperty, value); }
+		}
+
+		public string Foreground
+		{
+			get { return Get<string>(ForegroundProperty); }
+			set { Set(ForegroundProperty, value); }
+		}
 	}
 }

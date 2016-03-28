@@ -4,6 +4,16 @@ namespace Solid.UI
 {
 	public abstract class Brush
 	{
+
+	}
+
+	public abstract class LogicBrush : Brush
+	{
+		public abstract void Draw(UserInterface g, Rectangle target);
+	}
+
+	public abstract class RenderBrush : Brush
+	{
 		private int shaderProgram;
 		private int screenSizeLocation;
 		private int rectangleLocation;
@@ -11,7 +21,7 @@ namespace Solid.UI
 		internal int ScreenSizeLocation => this.screenSizeLocation;
 		internal int RectangleLocation => this.rectangleLocation;
 
-		protected Brush(string fragmentShaderSource)
+		protected RenderBrush(string fragmentShaderSource)
 		{
 			this.shaderProgram = GL.CreateProgram();
 

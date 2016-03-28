@@ -37,6 +37,7 @@ namespace Solid.Markup
 			this.RegisterConverter<TimeSpan, TimeSpanConverter>();
 			this.RegisterConverter<Guid, GuidConverter>();
 			this.RegisterConverter<bool, BooleanConverter>();
+			this.RegisterConverter<Uri, UriTypeConverter>();
 		}
 
 		public void RegisterConverter<TProperty, TConverter>()
@@ -56,7 +57,7 @@ namespace Solid.Markup
 
 		protected abstract IMarkupDocument<T> CreateDocument();
 
-		protected virtual void AddChildNode(T parent, T child)
+		protected virtual bool AddChildNode(T parent, T child)
 		{
 			var type = parent.GetType();
 			var addMethods = type
@@ -76,8 +77,7 @@ namespace Solid.Markup
 				}
 				childType = childType.BaseType;
 			}
-			if (childType == null)
-				throw new InvalidOperationException($"Could not find any Add method that can add a {child.GetType().Name}.");
+			return (childType != null);
 		}
 
 		protected virtual void SetProperty(T obj, MarkupProperty markupProperty)
@@ -119,15 +119,19 @@ namespace Solid.Markup
 			{
 				var childInstance = Map(doc, child, obj);
 
-				this.AddChildNode(obj, childInstance);
+				bool success =  this.AddChildNode(obj, childInstance);
 
-				if ((child.ID != null) && (obj is INamedNodeContainer<T>))
+				if ((child.ID != null) && (obj is INamedNodeContainer))
 				{
-					((INamedNodeContainer<T>)obj).SetChildNodeName(childInstance, child.ID);
+					((INamedNodeContainer)obj).SetChildNodeName(childInstance, child.ID);
+					success = true;
 				}
+
+				if(!success)
+					throw new InvalidOperationException($"Could not find any Add method that can add a {childInstance.GetType().Name}.");
 			}
 
-			if ((node.ID != null) && (!(parent is INamedNodeContainer<T>) || !this.swallowsNamedNodeInDocument))
+			if ((node.ID != null) && (!(parent is INamedNodeContainer) || !this.swallowsNamedNodeInDocument))
 				doc.SetNodeName(obj, node.ID);
 
 			doc.NotifyCreateNode(obj);

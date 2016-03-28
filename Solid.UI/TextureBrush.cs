@@ -1,11 +1,10 @@
-﻿using OpenTK.Graphics.OpenGL4;
-
-namespace Solid.UI
+﻿namespace Solid.UI
 {
-	public sealed class TextureBrush : Brush
-	{
-		private Texture texture;
+	using OpenTK.Graphics.OpenGL4;
+	using System;
 
+	public sealed class TextureBrush : RenderBrush
+	{
 		static string fragmentShaderSource =
 @"#version 330 core
 
@@ -17,11 +16,15 @@ uniform sampler2D uTexture;
 void main() {
 	color = texture2D(uTexture, uv);
 }";
-		private int textureLocation;
 
-		public TextureBrush(Texture texture) : 
+		private Texture texture;
+		private int textureLocation;
+		
+		public TextureBrush(Texture texture) :
 			base(fragmentShaderSource)
 		{
+			if (texture == null)
+				throw new ArgumentNullException(nameof(texture));
 			this.texture = texture;
 		}
 

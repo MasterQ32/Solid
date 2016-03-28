@@ -3,9 +3,10 @@ using Solid.Markup;
 using OpenTK.Graphics.OpenGL4;
 using System;
 using OpenTK.Graphics;
+using Solid.UI.Skinning;
 
 namespace Solid.UI
-{ 
+{
 	public class UserInterface : LayoutDocument
 	{
 		private int vertexArray;
@@ -29,13 +30,13 @@ namespace Solid.UI
 		private void Draw(Widget widget)
 		{
 			var drawable = widget as UIWidget;
-			if(drawable != null)
+			if (drawable != null)
 			{
 				var rect = drawable.GetClientRectangle();
 				rect.Y = (int)(screenSize.Height - rect.Y - rect.Height);
 
 				GL.Scissor((int)rect.X, (int)rect.Y, (int)rect.Width, (int)rect.Height);
-				drawable?.Draw( WidgetDrawMode.PreChildren);
+				drawable?.Draw(WidgetDrawMode.PreChildren);
 			}
 			foreach (var child in widget.Children)
 				Draw(child);
@@ -73,7 +74,7 @@ namespace Solid.UI
 			GL.BindVertexArray(0);
 			GL.UseProgram(0);
 		}
-
+		/*
 		public void DrawBox(Skin skin, string boxName, Rectangle target)
 		{
 			var tl = skin[boxName + "_TL"];
@@ -119,17 +120,42 @@ namespace Solid.UI
 				new Rectangle(target.X + target.Width - r.Width, target.Y + tr.Height, r.Width, target.Height - tr.Height - br.Height),
 				new TextureBrush(r));
 		}
+		*/
 
-		public void FillRectangle(Rectangle area, Brush brush)
+		public void RenderBrush(Brush brush, Rectangle area)
 		{
-			GL.UseProgram(brush.ShaderProgram);
+			if (brush == null)
+			{
+				return;
+			}
+			else if (brush is RenderBrush)
+			{
+				var rbrush = (RenderBrush)brush;
+				GL.UseProgram(rbrush.ShaderProgram);
 
-			brush.Setup();
+				rbrush.Setup();
 
-			GL.Uniform2(brush.ScreenSizeLocation, this.screenSize.Width, this.screenSize.Height);
-			GL.Uniform4(brush.RectangleLocation, area.X, area.Y, area.Width, area.Height);
+				GL.Uniform2(rbrush.ScreenSizeLocation, this.screenSize.Width, this.screenSize.Height);
+				GL.Uniform4(rbrush.RectangleLocation, area.X, area.Y, area.Width, area.Height);
 
-			this.DrawRawQuad();
+				this.DrawRawQuad();
+			}
+			else if (brush is LogicBrush)
+			{
+				var lbrush = (LogicBrush)brush;
+				lbrush.Draw(this, area);
+			}
+			else
+			{
+				throw new InvalidOperationException("The given brush type is not supported.");
+			}
+		}
+
+		public void RenderStyleBrush(string brushKey, StyleKey key, Rectangle area)
+		{
+			var style = this.Skin[brushKey];
+			if (style != null)
+				this.RenderBrush(style.GetBrush(key), area);
 		}
 
 		private void DrawRawQuad()
@@ -171,14 +197,16 @@ namespace Solid.UI
 			GL.BindVertexArray(0);
 			GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
 
-			
+
 		}
-		
+
 		public static UserInterface Load(string fileName)
 		{
 			var document = Parser.Load(fileName);
 			var mapper = new UIMapper();
 			return mapper.Instantiate(document);
 		}
+
+		public Skin Skin { get; set; }
 	}
 }

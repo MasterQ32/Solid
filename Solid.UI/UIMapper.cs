@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Solid.Markup;
 using OpenTK.Graphics;
 using System.Drawing;
+using Solid.UI.Skinning;
 
 namespace Solid.UI
 {
@@ -19,6 +20,9 @@ namespace Solid.UI
 			this.RegisterConverter<Color, ColorConverter>();
 			this.RegisterConverter<Brush, BrushConverter>();
 			this.RegisterConverter<Skin, SkinConverter>();
+			this.RegisterConverter<Rectangle, RectangleConverter>();
+
+			this.RegisterType<Panel>();
 		}
 
 		protected override Widget CreateNode(string nodeClass)

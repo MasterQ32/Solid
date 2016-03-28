@@ -1,6 +1,7 @@
 ﻿using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
+using Solid.UI.Skinning;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,7 +39,9 @@ namespace Solid.UI.Demo
 		protected override void OnLoad(EventArgs e)
 		{
 			GL.DebugMessageCallback(this.Callback, IntPtr.Zero);
+
 			this.ui.InitializeOpenGL();
+			this.ui.Skin = Skin.Load("skin.sml");
 		}
 
 		private void Callback(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr message, IntPtr userParam)

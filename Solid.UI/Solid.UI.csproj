@@ -47,10 +47,18 @@
   <ItemGroup>
     <Compile Include="Brush.cs" />
     <Compile Include="BrushConverter.cs" />
+    <Compile Include="Color4Converter.cs" />
+    <Compile Include="Panel.cs" />
     <Compile Include="Rectangle.cs" />
-    <Compile Include="Skin.cs" />
+    <Compile Include="RectangleConverter.cs" />
+    <Compile Include="Skinning\BrushDescriptor.cs" />
+    <Compile Include="Skinning\Skin.cs" />
     <Compile Include="SkinConverter.cs" />
+    <Compile Include="Skinning\SkinMapper.cs" />
+    <Compile Include="Skinning\TextureBoxBrush.cs" />
+    <Compile Include="Skinning\TextureBrushDescriptor.cs" />
     <Compile Include="SolidBrush.cs" />
+    <Compile Include="Skinning\Style.cs" />
     <Compile Include="Texture.cs" />
     <Compile Include="TextureBrush.cs" />
     <Compile Include="UIMapper.cs" />

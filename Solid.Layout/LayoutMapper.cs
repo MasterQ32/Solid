@@ -17,8 +17,12 @@ namespace Solid.Layout
 		}
 
 		protected override IMarkupDocument<Widget> CreateDocument() => new LayoutDocument();
-		
-		protected override void AddChildNode(Widget parent, Widget child) => parent.Children.Add(child);
+
+		protected override bool AddChildNode(Widget parent, Widget child)
+		{
+			parent.Children.Add(child);
+			return true;
+		}
 
 		public LayoutDocument Instantiate(MarkupDocument document) => (LayoutDocument)this.Map(document);
 	}
