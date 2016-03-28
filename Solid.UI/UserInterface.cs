@@ -27,6 +27,12 @@ namespace Solid.UI
 		{
 		}	
 
+		public object ViewModel
+		{
+			get { return this.Root.BindingSource; }
+			set { this.Root.BindingSource = value; }
+		}
+
 		protected override void OnNodeCreation(Widget node)
 		{
 			var uiElement = node as UIWidget;

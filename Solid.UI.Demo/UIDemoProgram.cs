@@ -35,7 +35,7 @@ namespace Solid.UI.Demo
 		{
 			this.ui = UserInterface.Load("userinterface.sml");
 			this.ui.Input = new GameWindowInput(this);
-			// this.ui.ViewModel = new GameViewModel();
+			this.ui.ViewModel = new GameViewModel();
 		}
 
 		protected override void OnLoad(EventArgs e)

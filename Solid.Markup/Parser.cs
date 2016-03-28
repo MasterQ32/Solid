@@ -286,9 +286,9 @@ namespace Solid.Markup
 			}
 		}
 
-		private string ReadNodeIdentifier(TextReader reader) => ReadWithPredicate(reader, (c) => char.IsLetter(c) || (c == '.') || (c == '_'));
+		private string ReadNodeIdentifier(TextReader reader) => ReadWithPredicate(reader, (c) => char.IsLetter(c) || char.IsDigit(c) || (c == '.') || (c == '_'));
 
-		private string ReadAttributeIdentifier(TextReader reader) => ReadWithPredicate(reader, (c) => char.IsLetter(c) || (c == '.') || (c == '_'));
+		private string ReadAttributeIdentifier(TextReader reader) => ReadWithPredicate(reader, (c) => char.IsLetter(c) || char.IsDigit(c)  || (c == '.') || (c == '_'));
 
 		private string ReadWithPredicate(TextReader reader, Predicate<char> predicate)
 		{

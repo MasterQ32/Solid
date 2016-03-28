@@ -44,6 +44,24 @@ namespace Solid
 		}
 
 		/// <summary>
+		/// Binds a solid property to a binding source property. This binding is only active when a binding source is given, otherwise it won't to shit.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="property">The property to bind.</param>
+		/// <param name="obj">The object for which the property is bound.</param>
+		/// <param name="targetPropertyName">The property of the binding source.</param>
+		/// <remarks>If name is null, any previous bindings will be undone.</remarks>
+		/// <remarks>There can only be a single binding per property and object.</remarks>
+		public static void Bind<T>(SolidProperty property, T obj, string targetPropertyName) where T : SolidObject
+		{
+			if (property == null)
+				throw new ArgumentNullException(nameof(property));
+			if (obj == null)
+				throw new ArgumentNullException(nameof(obj));
+			obj.SetPropertyBinding(property, targetPropertyName);
+		}
+
+		/// <summary>
 		/// Gets a list of all properties for the given type.
 		/// </summary>
 		/// <param name="type"></param>

@@ -12,6 +12,11 @@ namespace Solid
 	/// </summary>	
 	public class SolidObject : INotifyPropertyChanged
 	{
+		public static readonly SolidProperty BindingSourceProperty = SolidProperty.Register<SolidObject, object>(nameof(BindingSourceProperty), new SolidPropertyMetadata()
+		{
+			InheritFromHierarchy = true,
+		});
+
 		private Dictionary<SolidProperty, PropertyValue> properties = new Dictionary<SolidProperty, PropertyValue>();
 
 		public SolidObject()
@@ -63,6 +68,11 @@ namespace Solid
 			return GetValueHolder(property).Value;
 		}
 
+		internal void SetPropertyBinding(SolidProperty property, string targetPropertyName)
+		{
+			GetValueHolder(property).Binding = targetPropertyName;
+		}
+
 		/// <summary>
 		/// Gets an object that stores and verifies a property value.
 		/// </summary>
@@ -88,6 +98,12 @@ namespace Solid
 		{
 			var value = (PropertyValue)sender;
 			this.OnPropertyChanged(value.Property.Name);
+		}
+
+		public object BindingSource
+		{
+			get { return Get(BindingSourceProperty); }
+			set { Set(BindingSourceProperty, value); }
 		}
 
 		/// <summary>
@@ -125,15 +141,21 @@ namespace Solid
 			{
 				get
 				{
-					if(this.HasValueAssigned)
+					if(this.IsBindingApplicable)
+					{
+						var property = this.target.BindingSource.GetType().GetProperty(this.Binding);
+						return property.GetValue(this.target.BindingSource);
+					}
+
+					if (this.HasValueAssigned)
 						return this.value;
-					if(this.property.Metadata.InheritFromHierarchy && (this.hierarchy != null))
+					if (this.property.Metadata.InheritFromHierarchy && (this.hierarchy != null))
 					{
 						var parent = this.hierarchy.Parent;
-						while(parent != null)
+						while (parent != null)
 						{
 							var obj = (SolidObject)parent;
-							if(obj.HasProperty(this.property))
+							if (obj.HasProperty(this.property))
 							{
 								return obj.Get(this.property);
 							}
@@ -146,6 +168,13 @@ namespace Solid
 				{
 					if (this.property.PropertyType.IsAssignableFrom(value?.GetType()) == false)
 						throw new InvalidOperationException($"Cannot assign {this.property.PropertyType.Name} from {value?.GetType()?.Name}.");
+					
+					if (this.IsBindingApplicable)
+					{
+						var property = this.target.BindingSource.GetType().GetProperty(this.Binding);
+						property.SetValue(this.target.BindingSource, value);
+						return;
+					}
 
 					this.HasValueAssigned = true;
 
@@ -163,6 +192,35 @@ namespace Solid
 			}
 
 			public SolidProperty Property => this.property;
+
+			/// <summary>
+			/// Gets or sets the property name of the binding.
+			/// </summary>
+			public string Binding { get; set; }
+
+			/// <summary>
+			/// Gets if the binding source of the object is set and has the bound property.
+			/// </summary>
+			/// <returns></returns>
+			public bool IsBindingApplicable
+			{
+				get
+				{
+					if (this.Binding == null)
+						return false;
+					if (this.target.BindingSource == null)
+						return false;
+					var property = this.target.BindingSource.GetType().GetProperty(this.Binding);
+					if (property == null)
+						return false;
+					if (this.property.PropertyType.IsAssignableFrom(property.PropertyType) == false)
+						return false;
+					if (property.PropertyType.IsAssignableFrom(this.property.PropertyType) == false)
+						return false;
+
+					return true;
+				}
+			}
 		}
 	}
 }
