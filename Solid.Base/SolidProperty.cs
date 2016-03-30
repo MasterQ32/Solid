@@ -206,5 +206,7 @@ namespace Solid
 		/// <param name="target"></param>
 		/// <returns></returns>
 		public T GetValue<T>(SolidObject target) => (T)target.Get(this);
+
+		public override string ToString() => $"{this.PropertyType.Name} {this.Name}";
 	}
 }

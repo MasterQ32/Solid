@@ -3,7 +3,7 @@
 	using System;
 	using System.ComponentModel;
 
-	public sealed class GameViewModel 
+	public sealed class GameViewModel
 	{
 		private string displayText = "";
 
@@ -18,9 +18,13 @@
 			this.Input4 = new KeypadCommand(this, 4);
 			this.Input5 = new KeypadCommand(this, 5);
 			this.Input6 = new KeypadCommand(this, 6);
-			this.Input7 = new KeypadCommand(this, 7);
-			this.Input8 = new KeypadCommand(this, 8);
-			this.Input9 = new KeypadCommand(this, 9);
+
+			this.LowerRow = new
+			{
+				Input7 = new KeypadCommand(this, 7),
+				Input8 = new KeypadCommand(this, 8),
+				Input9 = new KeypadCommand(this, 9),
+			};
 		}
 
 		private void InputNumber(int number)
@@ -46,9 +50,12 @@
 		public Command Input4 { get; private set; }
 		public Command Input5 { get; private set; }
 		public Command Input6 { get; private set; }
+		/*
 		public Command Input7 { get; private set; }
 		public Command Input8 { get; private set; }
 		public Command Input9 { get; private set; }
+		*/
+		public object LowerRow { get; private set; }
 
 		private class KeypadCommand : Command
 		{

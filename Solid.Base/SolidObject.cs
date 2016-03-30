@@ -12,17 +12,25 @@ namespace Solid
 	/// </summary>	
 	public class SolidObject : INotifyPropertyChanged
 	{
-		public static readonly SolidProperty BindingSourceProperty = SolidProperty.Register<SolidObject, object>(nameof(BindingSourceProperty), new SolidPropertyMetadata()
+		public static readonly SolidProperty BindingSourceProperty = SolidProperty.Register<SolidObject, object>(nameof(BindingSource), new SolidPropertyMetadata()
 		{
 			InheritFromHierarchy = true,
 		});
-
+		
 		private Dictionary<SolidProperty, PropertyValue> properties = new Dictionary<SolidProperty, PropertyValue>();
 
 		public SolidObject()
 		{
+			// Binding source is 
+			{
+				var value = new BindingSourceValue(this);
+				value.ValueChanged += Value_ValueChanged;
+				this.properties.Add(BindingSourceProperty, value);
+			}
 			foreach (var property in SolidProperty.GetProperties(this.GetType()))
 			{
+				if (property.Value == BindingSourceProperty)
+					continue;
 				var value = new PropertyValue(this, property.Value);
 				value.ValueChanged += Value_ValueChanged;
 				this.properties.Add(property.Value, value);
@@ -116,10 +124,10 @@ namespace Solid
 
 		private class PropertyValue
 		{
-			private object value;
-			private readonly SolidProperty property;
-			private readonly SolidObject target;
-			private readonly IHierarchicalObject hierarchy;
+			protected object value;
+			protected readonly SolidProperty property;
+			protected readonly SolidObject target;
+			protected readonly IHierarchicalObject hierarchy;
 
 			public event EventHandler ValueChanged;
 
@@ -137,14 +145,20 @@ namespace Solid
 				this.HasValueAssigned = false;
 			}
 
-			public object Value
+			protected virtual object GetBindingSource()
+			{
+				return this.target.BindingSource;
+			}
+
+			public virtual object Value
 			{
 				get
 				{
-					if(this.IsBindingApplicable)
+					if (this.IsBindingApplicable.Read)
 					{
-						var property = this.target.BindingSource.GetType().GetProperty(this.Binding);
-						return property.GetValue(this.target.BindingSource);
+						var bindingSource = this.GetBindingSource();
+						var property = bindingSource.GetType().GetProperty(this.Binding);
+						return property.GetValue(bindingSource);
 					}
 
 					if (this.HasValueAssigned)
@@ -168,11 +182,12 @@ namespace Solid
 				{
 					if (this.property.PropertyType.IsAssignableFrom(value?.GetType()) == false)
 						throw new InvalidOperationException($"Cannot assign {this.property.PropertyType.Name} from {value?.GetType()?.Name}.");
-					
-					if (this.IsBindingApplicable)
+
+					if (this.IsBindingApplicable.Write)
 					{
-						var property = this.target.BindingSource.GetType().GetProperty(this.Binding);
-						property.SetValue(this.target.BindingSource, value);
+						var bindingSource = this.GetBindingSource();
+						var property = bindingSource.GetType().GetProperty(this.Binding);
+						property.SetValue(bindingSource, value);
 						return;
 					}
 
@@ -187,7 +202,7 @@ namespace Solid
 						((value != null) && (value.Equals(this.value) == false));
 					this.value = value;
 					if (changed && this.property.Metadata.EmitsChangedEvent)
-						this.ValueChanged.Invoke(this, EventArgs.Empty);
+						this.ValueChanged?.Invoke(this, EventArgs.Empty);
 				}
 			}
 
@@ -202,23 +217,78 @@ namespace Solid
 			/// Gets if the binding source of the object is set and has the bound property.
 			/// </summary>
 			/// <returns></returns>
-			public bool IsBindingApplicable
+			protected virtual BindingApplicability IsBindingApplicable
 			{
 				get
 				{
 					if (this.Binding == null)
-						return false;
+						return BindingApplicability.None;
 					if (this.target.BindingSource == null)
-						return false;
+						return BindingApplicability.None;
 					var property = this.target.BindingSource.GetType().GetProperty(this.Binding);
 					if (property == null)
-						return false;
-					if (this.property.PropertyType.IsAssignableFrom(property.PropertyType) == false)
-						return false;
-					if (property.PropertyType.IsAssignableFrom(this.property.PropertyType) == false)
-						return false;
+						return BindingApplicability.None;
 
-					return true;
+					bool read = this.property.PropertyType.IsAssignableFrom(property.PropertyType);
+					bool write = property.PropertyType.IsAssignableFrom(this.property.PropertyType);
+					return new BindingApplicability(read, write);
+				}
+			}
+
+			protected struct BindingApplicability
+			{
+				public static readonly BindingApplicability None = new BindingApplicability(false, false);
+
+				public static readonly BindingApplicability All = new BindingApplicability(true, true);
+
+				private readonly bool read, write;
+
+				public BindingApplicability(bool read, bool write)
+				{
+					this.read = read;
+					this.write = write;
+				}
+
+				public bool Read => this.read;
+
+				public bool Write => this.write;
+			}
+		}
+
+		private class BindingSourceValue : PropertyValue
+		{
+			public BindingSourceValue(SolidObject solidObject) :
+				base(solidObject, SolidObject.BindingSourceProperty)
+			{
+				this.ValueChanged += (s, e) => System.Diagnostics.Debugger.Break();
+			}
+
+			protected override object GetBindingSource()
+			{
+				var t = this.target;
+				if (t is IHierarchicalObject)
+				{
+					var h = (IHierarchicalObject)t;
+					if (h.Parent is SolidObject)
+						return ((SolidObject)h.Parent).BindingSource;
+					return null;
+				}
+				return null;
+			}
+
+			protected override BindingApplicability IsBindingApplicable
+			{
+				get
+				{
+					if (this.Binding == null)
+						return BindingApplicability.None;
+					var src = this.GetBindingSource();
+					if (src == null)
+						return BindingApplicability.None;
+					var property = src.GetType().GetProperty(this.Binding);
+					if (property == null)
+						return BindingApplicability.None;
+					return BindingApplicability.All;
 				}
 			}
 		}

@@ -28,13 +28,13 @@
 					Label(Text="6");
 				}
 				
-				Button(Table.Row=2, Table.Column=0, Click=[Input7]) {
+				Button(BindingSource=[LowerRow], Table.Row=2, Table.Column=0, Click=[Input7]) {
 					Label(Text="7");
 				}
-				Button(Table.Row=2, Table.Column=1, Click=[Input8]) {
+				Button(BindingSource=[LowerRow], Table.Row=2, Table.Column=1, Click=[Input8]) {
 					Label(Text="8");
 				}
-				Button(Table.Row=2, Table.Column=2, Click=[Input9]) {
+				Button(BindingSource=[LowerRow], Table.Row=2, Table.Column=2, Click=[Input9]) {
 					Label(Text="9");
 				}
 				
