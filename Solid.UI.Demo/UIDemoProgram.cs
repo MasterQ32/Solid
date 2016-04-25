@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using OpenTK.Input;
 
 namespace Solid.UI.Demo
 {
@@ -44,6 +45,11 @@ namespace Solid.UI.Demo
 
 			this.ui.InitializeOpenGL();
 			this.ui.Skin = Skin.Load("skin.sml");
+		}
+
+		protected override void OnKeyDown(KeyboardKeyEventArgs e)
+		{
+			base.OnKeyDown(e);
 		}
 
 		private void Callback(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr message, IntPtr userParam)

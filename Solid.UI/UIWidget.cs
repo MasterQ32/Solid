@@ -35,7 +35,7 @@ namespace Solid.UI
 				if (obj is UIWidget)
 				{
 					var widget = (UIWidget)obj;
-					var style = widget.UserInterface?.Skin[widget.GetType().Name];
+					var style = widget.UserInterface?.Skin?[widget.GetType().Name];
 					if(style != null)
 						return getValue(style);
 				}

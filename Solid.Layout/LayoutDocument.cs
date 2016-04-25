@@ -10,10 +10,23 @@ namespace Solid.Layout
 {
 	public class LayoutDocument : IMarkupDocument<Widget>
 	{
-		public LayoutDocument()
+		private readonly LayoutMapper templateMapper;
+
+		public LayoutDocument() : 
+			this(new LayoutMapper())
 		{
 
 		}
+
+		public LayoutDocument(LayoutMapper templateMapper)
+		{
+			this.templateMapper = templateMapper;
+		}
+
+		/// <summary>
+		/// Gets the mapper used for template instatiation.
+		/// </summary>
+		public LayoutMapper TemplateMapper => this.templateMapper;
 
 		public Widget Root { get; set; }
 
@@ -42,14 +55,20 @@ namespace Solid.Layout
 			return mapper.Instantiate(document);
 		}
 
-		void IMarkupDocument<Widget>.SetRoot(Widget root)
+		void IMarkupDocument<Widget>.SetRoot(Widget root) => this.OnSetRoot(root);
+
+		protected virtual void OnSetRoot(Widget root)
 		{
 			this.Root = root;
 		}
 
 		void IMarkupDocument<Widget>.SetNodeName(Widget node, string name) => this.SetNodeName(node, name);
 
-		void IMarkupDocument<Widget>.NotifyCreateNode(Widget node) => this.OnNodeCreation(node);
+		void IMarkupDocument<Widget>.NotifyCreateNode(Widget node)
+		{
+			node.document = this;
+			this.OnNodeCreation(node);
+		}
 
 		protected virtual void OnNodeCreation(Widget node)
 		{

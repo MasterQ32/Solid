@@ -94,10 +94,12 @@ namespace Solid.Markup
 		{
 			var doc = CreateDocument();
 
-			doc.SetRoot(Map(doc, document.Root, null));
+			doc.SetRoot(Map(doc, document.Root));
 
 			return doc;
 		}
+
+		public T Map(IMarkupDocument<T> doc, MarkupNode node) => this.Map(doc, node, null);
 
 		private T Map(IMarkupDocument<T> doc, MarkupNode node, T parent)
 		{

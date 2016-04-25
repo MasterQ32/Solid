@@ -31,8 +31,10 @@ namespace Solid
 		/// <returns></returns>
 		public static SolidProperty GetProperty(Type type, string name)
 		{
+			if (type == null) throw new ArgumentNullException(nameof(type));
+			if (name == null) throw new ArgumentNullException(nameof(name));
 			var registry = GetRegistryForType(type);
-			lock(registry)
+			lock (registry)
 			{
 				if (registry.ContainsKey(name))
 					return registry[name];
@@ -68,16 +70,18 @@ namespace Solid
 		/// <returns></returns>
 		public static IDictionary<string, SolidProperty> GetProperties(Type type)
 		{
+			if (type == null) throw new ArgumentNullException(nameof(type));
+
 			var registry = GetRegistryForType(type);
 			IDictionary<string, SolidProperty> properties;
 			lock (registry)
 			{
 				properties = registry.ToDictionary(k => k.Key, v => v.Value);
 			}
-			if(type.BaseType != null)
+			if (type.BaseType != null)
 			{
 				// recursivly find all properties....
-				foreach(var property in GetProperties(type.BaseType))
+				foreach (var property in GetProperties(type.BaseType))
 				{
 					if (properties.ContainsKey(property.Key) == false)
 						properties[property.Key] = property.Value;
@@ -95,16 +99,29 @@ namespace Solid
 		/// <param name="metaData">Some metadata that allows specification of the properties behaviour.</param>
 		/// <returns>Registered property</returns>
 		/// <exception cref="System.InvalidOperationException">Is thrown when a property with the given name is already registered.</exception>
+		public static SolidProperty Register(Type objectType, string name, Type propertyType)
+			=> Register(objectType, name, propertyType, null);
+
+		/// <summary>
+		/// Registers a property for a given type.
+		/// </summary>
+		/// <param name="objectType">The type of the class the property is defined on.</param>
+		/// <param name="name">The name of the property.</param>
+		/// <param name="propertyType">The type of the property value.</param>
+		/// <param name="metaData">Some metadata that allows specification of the properties behaviour.</param>
+		/// <returns>Registered property</returns>
+		/// <exception cref="InvalidOperationException">Is thrown when a property with the given name is already registered.</exception>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object)")]
 		public static SolidProperty Register(
 			Type objectType,
 			string name,
 			Type propertyType,
-			SolidPropertyMetadata metaData = null)
+			SolidPropertyMetadata metaData)
 		{
 			var property = new SolidProperty(name, objectType, propertyType, metaData ?? new SolidPropertyMetadata());
 
 			var registry = GetRegistryForType(objectType);
-			lock(registry)
+			lock (registry)
 			{
 				if (registry.ContainsKey(name))
 					throw new InvalidOperationException($"The property {name} is already registered.");
@@ -112,6 +129,7 @@ namespace Solid
 			}
 			return property;
 		}
+
 
 		/// <summary>
 		/// Registers a property for a given type.
@@ -122,7 +140,22 @@ namespace Solid
 		/// <param name="defaultValue">The default value the property has.</param>
 		/// <returns>Registered property</returns>
 		/// <exception cref="System.InvalidOperationException">Is thrown when a property with the given name is already registered.</exception>
-		public static SolidProperty Register<TObject, TProperty>(string propertyName, TProperty defaultValue = default(TProperty))
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter")]
+		public static SolidProperty Register<TObject, TProperty>(string propertyName)
+			where TObject : SolidObject
+			=> Register<TObject, TProperty>(propertyName, default(TProperty));
+
+		/// <summary>
+		/// Registers a property for a given type.
+		/// </summary>
+		/// <typeparam name="TObject">The type of the class the property is defined on.</typeparam>
+		/// <typeparam name="TProperty">The type of the property value.</typeparam>
+		/// <param name="propertyName">The name of the property.</param>
+		/// <param name="defaultValue">The default value the property has.</param>
+		/// <returns>Registered property</returns>
+		/// <exception cref="System.InvalidOperationException">Is thrown when a property with the given name is already registered.</exception>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter")]
+		public static SolidProperty Register<TObject, TProperty>(string propertyName, TProperty defaultValue)
 			where TObject : SolidObject
 			=> Register(typeof(TObject), propertyName, typeof(TProperty), new SolidPropertyMetadata()
 			{
@@ -138,13 +171,14 @@ namespace Solid
 		/// <param name="propertyName">The name of the property.</param>
 		/// <param name="metaData">Some metadata that allows specification of the properties behaviour.</param>
 		/// <returns>Registered property</returns>
-		/// <exception cref="System.InvalidOperationException">Is thrown when a property with the given name is already registered.</exception>
+		/// <exception cref="InvalidOperationException">Is thrown when a property with the given name is already registered.</exception>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter")]
 		public static SolidProperty Register<TObject, TProperty>(string propertyName, SolidPropertyMetadata metaData)
 			where TObject : SolidObject
 			=> Register(typeof(TObject), propertyName, typeof(TProperty), metaData);
 
 		private SolidProperty(
-			string name, 
+			string name,
 			Type targetType,
 			Type propertyType,
 			SolidPropertyMetadata meta)
@@ -190,14 +224,22 @@ namespace Solid
 		/// </summary>
 		/// <param name="target"></param>
 		/// <param name="value"></param>
-		public void SetValue(SolidObject target, object value) => target.Set(this, value);
+		public void SetValue(SolidObject target, object value)
+		{
+			if (target == null) throw new ArgumentNullException(nameof(target));
+			target.Set(this, value);
+		}
 
 		/// <summary>
 		/// Gets the value from the target object.
 		/// </summary>
 		/// <param name="target"></param>
 		/// <returns></returns>
-		public object GetValue(SolidObject target) => target.Get(this);
+		public object GetValue(SolidObject target)
+		{
+			if (target == null) throw new ArgumentNullException(nameof(target));
+			return target.Get(this);
+		}
 
 		/// <summary>
 		/// Gets the value from the target object.
@@ -205,8 +247,12 @@ namespace Solid
 		/// <typeparam name="T"></typeparam>
 		/// <param name="target"></param>
 		/// <returns></returns>
-		public T GetValue<T>(SolidObject target) => (T)target.Get(this);
+		public T GetValue<T>(SolidObject target)
+		{
+			if (target == null) throw new ArgumentNullException(nameof(target));
+			return (T)target.Get(this);
+		}
 
-		public override string ToString() => $"{this.PropertyType.Name} {this.Name}";
+		public override string ToString() => this.PropertyType.Name + " " + this.Name;
 	}
 }

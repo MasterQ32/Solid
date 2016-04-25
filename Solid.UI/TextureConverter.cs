@@ -19,7 +19,7 @@ namespace Solid.UI
 		{
 			if (value is string)
 			{
-				return new Texture((string)value);
+				return UserInterface.ResourceLoader.LoadTexture((string)value);
 			}
 			return base.ConvertFrom(context, culture, value);
 		}

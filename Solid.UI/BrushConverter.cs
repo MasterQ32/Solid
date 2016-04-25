@@ -33,7 +33,7 @@ namespace Solid.UI
 				// TODO: Implement brush parsing
 
 				// simple assumption: if brush is no color, the brush must be a texture brush
-				return new TextureBrush(new Texture(text));
+				return new TextureBrush(UserInterface.ResourceLoader.LoadTexture(text));
 
 				throw new NotSupportedException("The given brush description is not supported.");
 			}

@@ -10,30 +10,26 @@ namespace Solid
 	/// <summary>
 	/// Provides a bindable property system with property notifications.
 	/// </summary>	
-	public class SolidObject : INotifyPropertyChanged
+	public class SolidObject : INotifyPropertyChanged, INotifyPropertyChanging
 	{
-		public static readonly SolidProperty BindingSourceProperty = SolidProperty.Register<SolidObject, object>(nameof(BindingSource), new SolidPropertyMetadata()
+		public static SolidProperty BindingSourceProperty { get; } = SolidProperty.Register<SolidObject, object>(nameof(BindingSource), new SolidPropertyMetadata()
 		{
 			InheritFromHierarchy = true,
 		});
-		
+
 		private Dictionary<SolidProperty, PropertyValue> properties = new Dictionary<SolidProperty, PropertyValue>();
 
 		public SolidObject()
 		{
 			// Binding source is 
 			{
-				var value = new BindingSourceValue(this);
-				value.ValueChanged += Value_ValueChanged;
-				this.properties.Add(BindingSourceProperty, value);
+				this.properties.Add(BindingSourceProperty, new BindingSourceValue(this));
 			}
 			foreach (var property in SolidProperty.GetProperties(this.GetType()))
 			{
 				if (property.Value == BindingSourceProperty)
 					continue;
-				var value = new PropertyValue(this, property.Value);
-				value.ValueChanged += Value_ValueChanged;
-				this.properties.Add(property.Value, value);
+				this.properties.Add(property.Value, new PropertyValue(this, property.Value));
 			}
 		}
 
@@ -48,12 +44,27 @@ namespace Solid
 		public event PropertyChangedEventHandler PropertyChanged;
 
 		/// <summary>
+		/// Fires when a property is changing.
+		/// </summary>
+		/// <remarks>The value of the property will be the old value when this event is fired.</remarks>
+		public event PropertyChangingEventHandler PropertyChanging;
+
+		/// <summary>
 		/// Sends a PropertyChanged event.
 		/// </summary>
 		/// <param name="propertyName"></param>
 		protected void OnPropertyChanged(string propertyName)
 		{
 			this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+		}
+
+		/// <summary>
+		/// Sends a PropertyChanging event.
+		/// </summary>
+		/// <param name="propertyName"></param>
+		protected void OnPropertyChanging(string propertyName)
+		{
+			this.PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(propertyName));
 		}
 
 		/// <summary>
@@ -102,12 +113,6 @@ namespace Solid
 			}
 		}
 
-		private void Value_ValueChanged(object sender, EventArgs e)
-		{
-			var value = (PropertyValue)sender;
-			this.OnPropertyChanged(value.Property.Name);
-		}
-
 		public object BindingSource
 		{
 			get { return Get(BindingSourceProperty); }
@@ -124,18 +129,35 @@ namespace Solid
 
 		private class PropertyValue
 		{
-			protected object value;
-			protected readonly SolidProperty property;
+			protected object propertyValue;
+			private string binding;
+			protected readonly SolidProperty solidProperty;
 			protected readonly SolidObject target;
 			protected readonly IHierarchicalObject hierarchy;
 
-			public event EventHandler ValueChanged;
-
 			public PropertyValue(SolidObject target, SolidProperty property)
 			{
-				this.property = property;
+				this.solidProperty = property;
 				this.target = target;
+				this.target.PropertyChanging += Target_PropertyChanging;
+				this.target.PropertyChanged += Target_PropertyChanged;
 				this.hierarchy = this.target as IHierarchicalObject;
+			}
+
+			protected virtual void Target_PropertyChanging(object sender, PropertyChangingEventArgs e)
+			{
+				this.target.PropertyChanging -= Target_PropertyChanging;
+				if ((e.PropertyName == nameof(SolidObject.BindingSource)) && (this.Binding != null))
+					this.target.OnPropertyChanging(this.solidProperty.Name);
+				this.target.PropertyChanging += Target_PropertyChanging;
+			}
+
+			protected virtual void Target_PropertyChanged(object sender, PropertyChangedEventArgs e)
+			{
+				this.target.PropertyChanged -= Target_PropertyChanged;
+				if ((e.PropertyName == nameof(SolidObject.BindingSource)) && (this.Binding != null))
+					this.target.OnPropertyChanged(this.solidProperty.Name);
+				this.target.PropertyChanged += Target_PropertyChanged;
 			}
 
 			public bool HasValueAssigned { get; private set; }
@@ -150,6 +172,7 @@ namespace Solid
 				return this.target.BindingSource;
 			}
 
+			[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object,System.Object)")]
 			public virtual object Value
 			{
 				get
@@ -162,26 +185,26 @@ namespace Solid
 					}
 
 					if (this.HasValueAssigned)
-						return this.value;
-					if (this.property.Metadata.InheritFromHierarchy && (this.hierarchy != null))
+						return this.propertyValue;
+					if (this.solidProperty.Metadata.InheritFromHierarchy && (this.hierarchy != null))
 					{
 						var parent = this.hierarchy.Parent;
 						while (parent != null)
 						{
 							var obj = (SolidObject)parent;
-							if (obj.HasProperty(this.property))
+							if (obj.HasProperty(this.solidProperty))
 							{
-								return obj.Get(this.property);
+								return obj.Get(this.solidProperty);
 							}
 							parent = parent.Parent;
 						}
 					}
-					return this.property.Metadata.DefaultGenerator(this.target, this.property);
+					return this.solidProperty.Metadata.DefaultGenerator(this.target, this.solidProperty);
 				}
 				set
 				{
-					if (this.property.PropertyType.IsAssignableFrom(value?.GetType()) == false)
-						throw new InvalidOperationException($"Cannot assign {this.property.PropertyType.Name} from {value?.GetType()?.Name}.");
+					if (this.solidProperty.PropertyType.IsAssignableFrom(value?.GetType()) == false)
+						throw new InvalidOperationException($"Cannot assign {this.solidProperty.PropertyType.Name} from {value?.GetType()?.Name}.");
 
 					if (this.IsBindingApplicable.Write)
 					{
@@ -193,25 +216,38 @@ namespace Solid
 
 					this.HasValueAssigned = true;
 
-					if (this.value == value)
+					if (this.propertyValue == value)
 						return;
 					var changed =
-						((this.value == null) && (value != null)) ||
-						((this.value != null) && (value == null)) ||
-						((this.value != null) && (this.value.Equals(value) == false)) ||
-						((value != null) && (value.Equals(this.value) == false));
-					this.value = value;
-					if (changed && this.property.Metadata.EmitsChangedEvent)
-						this.ValueChanged?.Invoke(this, EventArgs.Empty);
+						((this.propertyValue == null) && (value != null)) ||
+						((this.propertyValue != null) && (value == null)) ||
+						((this.propertyValue != null) && (this.propertyValue.Equals(value) == false)) ||
+						((value != null) && (value.Equals(this.propertyValue) == false));
+					if (changed == false)
+						return;
+					if (this.solidProperty.Metadata.EmitsChangedEvent)
+						this.target.OnPropertyChanging(this.solidProperty.Name);
+					this.propertyValue = value;
+					if (this.solidProperty.Metadata.EmitsChangedEvent)
+						this.target.OnPropertyChanged(this.solidProperty.Name);
 				}
 			}
-
-			public SolidProperty Property => this.property;
 
 			/// <summary>
 			/// Gets or sets the property name of the binding.
 			/// </summary>
-			public string Binding { get; set; }
+			public string Binding
+			{
+				get { return this.binding; }
+				set
+				{
+					if (this.binding == value)
+						return;
+					this.target.OnPropertyChanging(this.solidProperty.Name);
+					this.binding = value;
+					this.target.OnPropertyChanged(this.solidProperty.Name);
+				}
+			}
 
 			/// <summary>
 			/// Gets if the binding source of the object is set and has the bound property.
@@ -229,8 +265,8 @@ namespace Solid
 					if (property == null)
 						return BindingApplicability.None;
 
-					bool read = this.property.PropertyType.IsAssignableFrom(property.PropertyType);
-					bool write = property.PropertyType.IsAssignableFrom(this.property.PropertyType);
+					bool read = this.solidProperty.PropertyType.IsAssignableFrom(property.PropertyType);
+					bool write = property.PropertyType.IsAssignableFrom(this.solidProperty.PropertyType);
 					return new BindingApplicability(read, write);
 				}
 			}
@@ -260,15 +296,55 @@ namespace Solid
 			public BindingSourceValue(SolidObject solidObject) :
 				base(solidObject, SolidObject.BindingSourceProperty)
 			{
-				this.ValueChanged += (s, e) => System.Diagnostics.Debugger.Break();
+				if(this.target is IHierarchicalObject)
+				{
+					var hier = (IHierarchicalObject)this.target;
+					hier.ParentChanged += Hier_ParentChanged;
+				}
+			}
+
+			private void Hier_ParentChanged(object sender, ParentChangedEventArgs e)
+			{
+				var old = (SolidObject)e.OldParent;
+				var @new = (SolidObject)e.NewParent;
+				if (old != null)
+				{
+					old.PropertyChanging -= Parent_PropertyChanging;
+					old.PropertyChanged -= Parent_PropertyChanged;
+				}
+				if (@new != null)
+				{
+					@new.PropertyChanging += Parent_PropertyChanging;
+					@new.PropertyChanged += Parent_PropertyChanged;
+				}
+			}
+
+			private void Parent_PropertyChanging(object sender, PropertyChangingEventArgs e)
+			{
+				this.target.OnPropertyChanging(this.solidProperty.Name);
+			}
+
+			private void Parent_PropertyChanged(object sender, PropertyChangedEventArgs e)
+			{
+				this.target.OnPropertyChanged(this.solidProperty.Name);
+			}
+
+			protected override void Target_PropertyChanged(object sender, PropertyChangedEventArgs e)
+			{
+				// base.Target_PropertyChanged(sender, e);
+			}
+
+			protected override void Target_PropertyChanging(object sender, PropertyChangingEventArgs e)
+			{
+				// base.Target_PropertyChanging(sender, e);
 			}
 
 			protected override object GetBindingSource()
 			{
 				var t = this.target;
-				if (t is IHierarchicalObject)
+				var h = t as IHierarchicalObject;
+				if(h != null)
 				{
-					var h = (IHierarchicalObject)t;
 					if (h.Parent is SolidObject)
 						return ((SolidObject)h.Parent).BindingSource;
 					return null;

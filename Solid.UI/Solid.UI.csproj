@@ -58,10 +58,12 @@
     <Compile Include="Button.cs" />
     <Compile Include="Color4Converter.cs" />
     <Compile Include="Command.cs" />
+    <Compile Include="DefaultResourceLoader.cs" />
     <Compile Include="FaceConverter.cs" />
     <Compile Include="FontTextureBrush.cs" />
     <Compile Include="GameWindowInput.cs" />
     <Compile Include="Image.cs" />
+    <Compile Include="IResourceLoader.cs" />
     <Compile Include="Label.cs" />
     <Compile Include="Panel.cs" />
     <Compile Include="Rectangle.cs" />

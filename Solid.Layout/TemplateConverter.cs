@@ -1,15 +1,15 @@
-﻿using SharpFont;
+﻿using Solid.Markup;
 using System;
 using System.ComponentModel;
 using System.Globalization;
 
-namespace Solid.UI
+namespace Solid.Layout
 {
-	public class FaceConverter : TypeConverter
+	public  class TemplateConverter : TypeConverter
 	{
 		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
 		{
-			if (sourceType == typeof(string))
+			if(sourceType == typeof(string))
 			{
 				return true;
 			}
@@ -20,8 +20,8 @@ namespace Solid.UI
 		{
 			if(value is string)
 			{
-				var text = (string)value;
-				return UserInterface.ResourceLoader.LoadFont(text);
+				var fileName = (string)value;
+				return Parser.Load(fileName);
 			}
 			return base.ConvertFrom(context, culture, value);
 		}

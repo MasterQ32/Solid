@@ -31,8 +31,7 @@ namespace Solid.UI
 		public UIMapper()
 		{
 			RegisterConverters(this);
-
-			this.RegisterType<Panel>();
+			
 			this.RegisterType<Button>();
 			this.RegisterType<Label>();
 			this.RegisterType<Image>();
@@ -44,6 +43,7 @@ namespace Solid.UI
 			{
 				// Override widget with UIWidget
 				case "Widget": return new UIWidget();
+				case "Panel": return new Panel();
 				default: return base.CreateNode(nodeClass);
 			}
 		}

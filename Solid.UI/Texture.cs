@@ -1,6 +1,7 @@
 ﻿using OpenTK.Graphics.OpenGL4;
 using System;
 using System.Drawing;
+using System.IO;
 
 namespace Solid.UI
 {
@@ -33,6 +34,12 @@ namespace Solid.UI
 
 		public Texture(string fileName) :
 			this(new Bitmap(fileName))
+		{
+
+		}
+
+		public Texture(Stream source) :
+			this(new Bitmap(source))
 		{
 
 		}

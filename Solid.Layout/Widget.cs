@@ -13,9 +13,13 @@ namespace Solid.Layout
 	{
 		private readonly WidgetChildCollection children;
 		private Widget parent = null;
+		protected bool childrenAreLocked = false;
 
 		Point actualPosition;
 		Size actualSize;
+
+		// Used for template instantiation
+		internal LayoutDocument document;
 
 		public Widget()
 		{
@@ -29,6 +33,7 @@ namespace Solid.Layout
 			{
 				if (this.parent == value)
 					return;
+				var previous = this.parent;
 				this.parent?.Children.Remove(this);
 				if (value != null)
 				{
@@ -41,6 +46,8 @@ namespace Solid.Layout
 				}
 			}
 		}
+
+		public bool AreChildrenLocked => this.childrenAreLocked;
 
 		public IList<Widget> Children => this.children;
 
@@ -440,6 +447,8 @@ namespace Solid.Layout
 
 				set
 				{
+					if (this.widget.childrenAreLocked)
+						throw new InvalidOperationException("Cannot change items of an object with locked children.");
 					if (children[index] == value)
 						return;
 					CheckValidChild(value);
@@ -454,22 +463,41 @@ namespace Solid.Layout
 
 			public bool IsReadOnly => ((IList<Widget>)children).IsReadOnly;
 
+			private void NotifySetParent(Widget item)
+			{
+				item?.ParentChanged?.Invoke(this, new ParentChangedEventArgs(null, this.widget));
+			}
+
+			private void NotifyResetParent(Widget item)
+			{
+				item?.ParentChanged?.Invoke(this, new ParentChangedEventArgs(this.widget, null));
+			}
+
 			public void Add(Widget item)
 			{
+				if (this.widget.childrenAreLocked)
+					throw new InvalidOperationException("Cannot add items to an object with locked children.");
 				CheckValidChild(item);
 				if (item.parent == this.widget)
 					throw new InvalidOperationException("The widget is already a child.");
-
+				
 				if (item.parent != null)
 					item.parent.Children.Remove(item);
 				item.parent = this.widget;
 				children.Add(item);
+
+				NotifySetParent(item);
 			}
 
 			public void Clear()
 			{
+				if (this.widget.childrenAreLocked)
+					throw new InvalidOperationException("Cannot remove items to an object with locked children.");
 				foreach (var widget in this.children)
+				{
 					widget.parent = null;
+					NotifyResetParent(widget);
+				}
 				children.Clear();
 			}
 
@@ -483,26 +511,36 @@ namespace Solid.Layout
 
 			public void Insert(int index, Widget item)
 			{
+				if (this.widget.childrenAreLocked)
+					throw new InvalidOperationException("Cannot add items to an object with locked children.");
 				if (item.parent == this.widget)
 					throw new InvalidOperationException("The widget is already a child.");
 				item.parent?.children?.Remove(item);
 				item.parent = this.widget;
 				children.Insert(index, item);
+				NotifySetParent(item);
 			}
 
 			public bool Remove(Widget item)
 			{
+				if (this.widget.childrenAreLocked)
+					throw new InvalidOperationException("Cannot remove items from an object with locked children.");
 				if (item.parent != this.widget)
 					throw new InvalidOperationException("The widget is no child.");
 				item.parent = null;
-				return children.Remove(item);
+				var removed = children.Remove(item);
+				NotifyResetParent(item);
+				return removed;
 			}
 
 			public void RemoveAt(int index)
 			{
+				if (this.widget.childrenAreLocked)
+					throw new InvalidOperationException("Cannot remove items from an object with locked children.");
 				var child = this.children[index];
 				child.parent = null;
 				children.RemoveAt(index);
+				NotifyResetParent(child);
 			}
 
 			IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
@@ -511,6 +549,8 @@ namespace Solid.Layout
 		#endregion
 
 		#region IHierarchicalObject
+
+		public event EventHandler<ParentChangedEventArgs> ParentChanged;
 
 		IHierarchicalObject IHierarchicalObject.Parent => this.parent;
 

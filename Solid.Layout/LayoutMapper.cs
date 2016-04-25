@@ -6,7 +6,7 @@ namespace Solid.Layout
 	public class LayoutMapper : SolidMapper<Widget>
 	{
 		public LayoutMapper()
-		{
+		{ 
 			RegisterType<StackPanel>();
 			RegisterType<DockPanel>();
 			RegisterType<Canvas>();
@@ -14,6 +14,7 @@ namespace Solid.Layout
 			RegisterType<Widget>();
 
 			RegisterConverter<Thickness, ThicknessConverter>();
+			RegisterConverter<MarkupDocument, TemplateConverter>();
 		}
 
 		protected override IMarkupDocument<Widget> CreateDocument() => new LayoutDocument();

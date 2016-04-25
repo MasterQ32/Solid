@@ -6,6 +6,7 @@ using OpenTK.Graphics;
 using Solid.UI.Skinning;
 using OpenTK.Input;
 using SharpFont;
+using System.IO;
 
 namespace Solid.UI
 {
@@ -20,13 +21,50 @@ namespace Solid.UI
 		private InputSource input;
 
 		private UIWidget currentMouseWidget;
-		
-		private FontTextureBrush fontBrush;
-		
-		public UserInterface()
-		{
 
-		}	
+		private FontTextureBrush fontBrush;
+
+		public UserInterface() :
+			base(new UIMapper())
+		{
+			this.Skin = new Skin();
+			this.Skin["Panel"] = new Style()
+			{
+				Padding = new Thickness(8.0f),
+				Default = new TextureBoxBrush()
+				{
+					BorderSize = 1,
+
+					TopLeft = new SolidBrush(Color4.Black),
+					TopMiddle = new SolidBrush(Color4.Black),
+					TopRight = new SolidBrush(Color4.Black),
+					MiddleLeft = new SolidBrush(Color4.Black),
+					MiddleRight = new SolidBrush(Color4.Black),
+					BottomLeft = new SolidBrush(Color4.Black),
+					BottomCenter = new SolidBrush(Color4.Black),
+					BottomRight = new SolidBrush(Color4.Black),
+
+					Center = new SolidBrush(Color4.DimGray),
+				},
+			};
+			this.Skin["Button"] = new Style()
+			{
+				// Width = 128.0f,
+				Height = 32.0f,
+				Padding = new Thickness(4.0f),
+				Margin = new Thickness(2.0f),
+				Default = new SolidBrush(new Color4(0.7f, 0.7f, 0.7f, 1.0f)),
+				Hovered = new SolidBrush(new Color4(0.8f, 0.8f, 0.8f, 1.0f)),
+				Active = new SolidBrush(new Color4(0.6f, 0.6f, 0.6f, 1.0f)),
+				Disabled = new SolidBrush(new Color4(0.3f, 0.3f, 0.3f, 1.0f)),
+			};
+			this.Skin["Label"] = new Style()
+			{
+				Font = new Face(FontLibrary, @"C:\Windows\Fonts\arial.ttf"),
+				FontSize = 24,
+				FontColor = Color4.Black,
+			};
+		}
 
 		public object ViewModel
 		{
@@ -83,6 +121,7 @@ namespace Solid.UI
 			GL.Enable(EnableCap.ScissorTest);
 			GL.Enable(EnableCap.Blend);
 			GL.Disable(EnableCap.DepthTest);
+			GL.Disable(EnableCap.CullFace);
 
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 		}
@@ -96,8 +135,8 @@ namespace Solid.UI
 		}
 
 		public Rectangle RenderString(
-			string text, 
-			Rectangle area, 
+			string text,
+			Rectangle area,
 			string styleName,
 			bool onlyMeasureFont = false)
 		{
@@ -107,7 +146,7 @@ namespace Solid.UI
 			Rectangle resultingSize = new Rectangle(area.Position, new Size(0, style.FontSize));
 
 			style.Font.SetPixelSizes(0, (uint)style.FontSize);
-			
+
 			for (int i = 0; i < text.Length; i++)
 			{
 				var c = text[i];
@@ -146,7 +185,7 @@ namespace Solid.UI
 									bitmap.Width,
 									bitmap.Rows));
 						}
-						
+
 						resultingSize.Width = Math.Max(resultingSize.Width, cursor.X + glyph.Metrics.Width.ToSingle());
 
 						cursor.X += glyph.Advance.X.ToSingle();
@@ -189,7 +228,7 @@ namespace Solid.UI
 
 		public void RenderStyleBrush(string brushKey, StyleKey key, Rectangle area)
 		{
-			var style = this.Skin[brushKey];
+			var style = this.Skin?[brushKey];
 			if (style != null)
 				this.RenderBrush(style.GetBrush(key), area);
 		}
@@ -270,6 +309,24 @@ namespace Solid.UI
 			}
 		}
 
+		/// <summary>
+		/// Gets the current resource loader.
+		/// </summary>
+		public static IResourceLoader ResourceLoader
+		{
+			get;
+			private set;
+		} = new DefaultResourceLoader();
+
+		/// <summary>
+		/// Sets the resource loader for the current program.
+		/// </summary>
+		/// <param name="loader"></param>
+		public static void SetResourceLoader(IResourceLoader loader)
+		{
+			ResourceLoader = loader ?? new DefaultResourceLoader();
+		}
+
 		#region Input Handling
 
 		private UIWidget GetWidgetFromPosition(Point pt) => this.GetWidgetFromPosition(this.Root, pt);
@@ -279,13 +336,14 @@ namespace Solid.UI
 			var rect = new Rectangle(widget.Position, widget.Size);
 			if (rect.Contains(pt) == false)
 				return null;
-			foreach(var child in widget.Children)
+			foreach (var child in widget.Children)
 			{
 				var childWidget = GetWidgetFromPosition(child, pt);
 				if (childWidget != null)
 					return childWidget;
 			}
-			if (widget is UIWidget) {
+			if (widget is UIWidget)
+			{
 				var uiWidget = (UIWidget)widget;
 				if (uiWidget.IsTouchable == false)
 					return null;
@@ -295,7 +353,7 @@ namespace Solid.UI
 				return null;
 			}
 		}
-		
+
 		private void Input_MouseWheel(object sender, OpenTK.Input.MouseWheelEventArgs e)
 		{
 			var ipos = new Point(e.X, e.Y);
@@ -323,7 +381,7 @@ namespace Solid.UI
 			var ipos = new Point(e.X, e.Y);
 			var widget = this.GetWidgetFromPosition(ipos);
 
-			if(widget != this.currentMouseWidget)
+			if (widget != this.currentMouseWidget)
 			{
 				if (this.currentMouseWidget != null)
 				{
@@ -353,7 +411,7 @@ namespace Solid.UI
 				widget.OnMouseDown(new MouseButtonEventArgs((int)cpos.X, (int)cpos.Y, e.Button, e.IsPressed));
 			}
 		}
-		
+
 		private void Input_KeyUp(object sender, OpenTK.Input.KeyboardKeyEventArgs e)
 		{
 
@@ -374,6 +432,13 @@ namespace Solid.UI
 		public static UserInterface Load(string fileName)
 		{
 			var document = Parser.Load(fileName);
+			var mapper = new UIMapper();
+			return mapper.Instantiate(document);
+		}
+
+		public static UserInterface Load(Stream stream, System.Text.Encoding encoding)
+		{
+			var document = Parser.Parse(stream, encoding);
 			var mapper = new UIMapper();
 			return mapper.Instantiate(document);
 		}

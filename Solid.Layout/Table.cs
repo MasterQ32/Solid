@@ -2,7 +2,7 @@
 {
 	using static System.Math;
 
-	public class Table : Widget
+	public class Table : Panel
 	{
 		public static readonly SolidProperty RowProperty = SolidProperty.Register<Widget, int>("Table.Row");
 		public static readonly SolidProperty ColumnProperty = SolidProperty.Register<Widget, int>("Table.Column");

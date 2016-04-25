@@ -12,7 +12,7 @@ namespace Solid.UI.Skinning
 		{
 			if ((Rect.Width > 0) && (Rect.Height > 0))
 			{
-				using (var bmp = new Bitmap(this.Source))
+				using (var bmp =  UserInterface.ResourceLoader.LoadBitmap(this.Source))
 				{
 					using (var target = new Bitmap((int)this.Rect.Width, (int)this.Rect.Height))
 					{
@@ -29,7 +29,7 @@ namespace Solid.UI.Skinning
 				}
 			}
 			else {
-				return new TextureBrush(new Texture(this.Source));
+				return new TextureBrush(UserInterface.ResourceLoader.LoadTexture(this.Source));
 			}
 		}
 

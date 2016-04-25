@@ -2,7 +2,7 @@
 
 namespace Solid.Layout
 {
-	public class DockPanel : Widget
+	public class DockPanel : Panel
 	{
 		public static readonly SolidProperty DockProperty = SolidProperty.Register<Widget, DockStyle>("DockPanel.Dock", DockStyle.Left);
 

@@ -2,7 +2,7 @@
 {
 	using static System.Math;
 
-	public class Canvas : Widget
+	public class Canvas : Panel
 	{
 		public static readonly SolidProperty LeftProperty = SolidProperty.Register<Widget, float>("Canvas.Left");
 		public static readonly SolidProperty TopProperty = SolidProperty.Register<Widget, float>("Canvas.Top");

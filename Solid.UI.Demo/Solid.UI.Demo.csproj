@@ -64,6 +64,9 @@
     <None Include="skin.sml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="pressed-number.sml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="userinterface.sml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -38,16 +38,18 @@
 					Label(Text="9");
 				}
 				
-				Button(Table.Row=3, Table.Column=0) {
+				Button(Table.Row=3, Table.Column=0, Click=[Clear]) {
 					Image(VerticalAlignment=Center, HorizontalAlignment=Center, Source = "red_cross.png", IsTouchable=False);
 				}
 				Button(Table.Row=3, Table.Column=1, Click=[Input0]) {
 					Label(Text="0");
 				}
-				Button(Table.Row=3, Table.Column=2) {
+				Button(Table.Row=3, Table.Column=2, Click=[Check]) {
 					Image(VerticalAlignment=Center, HorizontalAlignment=Center, Source = "green_checkmark.png", IsTouchable=False);
 				}
 			}
 		}
 	}
+
+	StackPanel(Template = "pressed-number.sml", Items = [PressedNumbers], Direction=Vertical, HorizontalAlignment=Right, Width=200);
 }
