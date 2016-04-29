@@ -25,6 +25,20 @@ namespace Solid.Markup
 			factories.Add(name, () => new TNode());
 		}
 
+		public void RegisterType(Type type) => RegisterType(type, type.Name);
+
+		public void RegisterType(Type type, string name)
+		{
+			if (type == null) throw new ArgumentNullException(nameof(type));
+			if (name == null) throw new ArgumentNullException(nameof(name));
+			if (type.IsSubclassOf(typeof(T)) == false)
+				throw new ArgumentException($"{nameof(type)} must derive from {typeof(T).Name}.", nameof(type));
+			var ctor = type.GetConstructor(Type.EmptyTypes);
+			if (ctor == null)
+				throw new InvalidOperationException("The given type must feature a public default constructor.");
+			factories.Add(name, () => (T)ctor.Invoke(null));
+        }
+
 		protected override T CreateNode(string nodeClass)
 		{
 			if (factories.ContainsKey(nodeClass))

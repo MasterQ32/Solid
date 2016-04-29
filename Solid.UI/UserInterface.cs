@@ -7,6 +7,7 @@ using Solid.UI.Skinning;
 using OpenTK.Input;
 using SharpFont;
 using System.IO;
+using System.Collections.Generic;
 
 namespace Solid.UI
 {
@@ -429,17 +430,39 @@ namespace Solid.UI
 
 		#endregion
 
+		private static readonly Dictionary<string, Type> customTypes = new Dictionary<string, Type>();
+
+		public static void RegisterCustomWidget<T>(string name)
+			where T : UIWidget
+		{
+			lock(customTypes)
+				customTypes.Add(name, typeof(T));
+		}
+
+		public static void RegisterCustomWidget<T>()
+			where T : UIWidget
+			=> RegisterCustomWidget<T>(typeof(T).Name);
+
 		public static UserInterface Load(string fileName)
 		{
 			var document = Parser.Load(fileName);
-			var mapper = new UIMapper();
-			return mapper.Instantiate(document);
+			return Create(document);
 		}
 
 		public static UserInterface Load(Stream stream, System.Text.Encoding encoding)
 		{
 			var document = Parser.Parse(stream, encoding);
+			return Create(document);
+		}
+
+		private static UserInterface Create(MarkupDocument document)
+		{
 			var mapper = new UIMapper();
+			lock (customTypes)
+			{
+				foreach (var ctype in customTypes)
+					mapper.RegisterType(ctype.Value, ctype.Key);
+			}
 			return mapper.Instantiate(document);
 		}
 	}
