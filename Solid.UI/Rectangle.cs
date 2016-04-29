@@ -49,5 +49,7 @@ namespace Solid.UI
 				(pt.X < (this.X + this.Width)) &&
 				(pt.Y < (this.Y + this.Height));
 		}
+
+		public override string ToString() => $"{Position} -> {Size}";
 	}
 }

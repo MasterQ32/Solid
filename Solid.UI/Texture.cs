@@ -44,6 +44,17 @@ namespace Solid.UI
 
 		}
 
+		public void SetWrap(TextureWrapMode wrap)
+		{
+			this.Bind();
+
+			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapR, (int)wrap);
+			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)wrap);
+			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)wrap);
+
+			GL.BindTexture(TextureTarget.Texture2D, 0);
+		}
+
 		public void Load(
 			int width,
 			int height,
