@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Solid.UI
+namespace Solid.UI.Converters
 {
 	public class RectangleConverter : TypeConverter
 	{

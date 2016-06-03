@@ -39,35 +39,36 @@
     <Reference Include="System">
       <HintPath>..\..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5\System.dll</HintPath>
     </Reference>
-    <Reference Include="System.Drawing">
-      <HintPath>..\..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5\System.Drawing.dll</HintPath>
-    </Reference>
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Button.cs" />
-    <Compile Include="Color4Converter.cs" />
+    <Compile Include="Converters\ColorConverter.cs" />
     <Compile Include="Command.cs" />
-    <Compile Include="FaceConverter.cs" />
-    <Compile Include="FontTextureBrush.cs" />
+    <Compile Include="Form.cs" />
     <Compile Include="GameWindowInput.cs" />
-    <Compile Include="Image.cs" />
-    <Compile Include="IResourceLoader.cs" />
+    <Compile Include="Input\KeyboardEventArgs.cs" />
+    <Compile Include="Input\MouseButton.cs" />
+    <Compile Include="Input\MouseEventArgs.cs" />
+    <Compile Include="Input\MouseEventType.cs" />
+    <Compile Include="Input\TextInputEventArgs.cs" />
     <Compile Include="Label.cs" />
     <Compile Include="Panel.cs" />
     <Compile Include="Rectangle.cs" />
-    <Compile Include="RectangleConverter.cs" />
-    <Compile Include="Skinning\BrushDescriptor.cs" />
+    <Compile Include="Converters\RectangleConverter.cs" />
+    <Compile Include="Skinning\Converters\BrushConverter.cs" />
     <Compile Include="Skinning\Color.cs" />
     <Compile Include="Skinning\IBrush.cs" />
     <Compile Include="Skinning\IFont.cs" />
+    <Compile Include="Skinning\Converters\FontConverter.cs" />
+    <Compile Include="Skinning\IGraphics.cs" />
+    <Compile Include="Skinning\IGraphicsObjectFactory.cs" />
     <Compile Include="Skinning\Skin.cs" />
     <Compile Include="SkinConverter.cs" />
     <Compile Include="Skinning\SkinMapper.cs" />
-    <Compile Include="Skinning\SolidBrushDescriptor.cs" />
     <Compile Include="Skinning\Style.cs" />
-    <Compile Include="InputSource.cs" />
-    <Compile Include="TextureConverter.cs" />
+    <Compile Include="Input\InputSource.cs" />
+    <Compile Include="Skinning\StyleKey.cs" />
     <Compile Include="UIMapper.cs" />
     <Compile Include="UIWidget.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -88,9 +89,7 @@
       <Name>Solid.Markup</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Converters\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

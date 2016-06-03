@@ -5,6 +5,7 @@ using System.Globalization;
 
 namespace Solid.UI
 {
+	/*
 	public sealed class SkinConverter : TypeConverter
 	{
 		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
@@ -26,4 +27,5 @@ namespace Solid.UI
 			return base.ConvertFrom(context, culture, value);
 		}
 	}
+	*/
 }

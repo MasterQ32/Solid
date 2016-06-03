@@ -1,8 +1,5 @@
-﻿using OpenTK;
-using OpenTK.Graphics;
-using OpenTK.Graphics.OpenGL4;
-using OpenTK.Input;
-using Solid.Layout;
+﻿using Solid.Layout;
+using Solid.UI.Input;
 using Solid.UI.Skinning;
 using System;
 using System.Collections.Generic;
@@ -14,10 +11,22 @@ namespace Solid.UI
 {
 	public class UIWidget : Widget
 	{
-		public static readonly SolidProperty ForegroundProperty = SolidProperty.Register<UIWidget, string>(nameof(Foreground));
+		public static readonly SolidProperty FormProperty = SolidProperty.Register<Widget, Form>("Form", new SolidPropertyMetadata()
+		{
 
-		public static readonly SolidProperty BackgroundProperty = SolidProperty.Register<UIWidget, string>(nameof(Background));
+		});
 
+		public static readonly SolidProperty StyleProperty = SolidProperty.Register<UIWidget, string>(nameof(Style), new SolidPropertyMetadata()
+		{
+			DefaultGenerator = (obj, prop) =>
+			{
+				var widget = (UIWidget)obj;
+				var form = FormProperty.GetValue<Form>(obj);
+				var styleName = widget.GetType().Name;
+				return form.Skin[styleName];
+			},
+		});
+		
 		public static readonly SolidProperty IsTouchableProperty = SolidProperty.Register<UIWidget, bool>(nameof(IsTouchable), new SolidPropertyMetadata()
 		{
 			DefaultValue = true,
@@ -26,7 +35,7 @@ namespace Solid.UI
 
 		public static readonly SolidProperty ClickCommandProperty = SolidProperty.Register<UIWidget, Command>(nameof(ClickCommand));
 
-		private static void ExtendDefaultGen(SolidProperty property, Func<Style,object> getValue)
+		protected static void ExtendDefaultGen(SolidProperty property, Func<Style, object> getValue)
 		{
 			// Overrides the property defaults of some properties so the style can define the default value.
 			var prevGen = property.Metadata.DefaultGenerator;
@@ -35,8 +44,8 @@ namespace Solid.UI
 				if (obj is UIWidget)
 				{
 					var widget = (UIWidget)obj;
-					var style = widget.UserInterface?.Skin?[widget.GetType().Name];
-					if(style != null)
+					var style = widget.Style;
+					if (style != null)
 						return getValue(style);
 				}
 				return prevGen(obj, prop);
@@ -52,16 +61,17 @@ namespace Solid.UI
 			ExtendDefaultGen(DeclaredSizeProperty, (style) => style.Size);
 		}
 
-		public event EventHandler<KeyboardKeyEventArgs> KeyDown;
-		public event EventHandler<KeyPressEventArgs> KeyPress;
-		public event EventHandler<KeyboardKeyEventArgs> KeyUp;
+		public event EventHandler<TextInputEventArgs> TextInput;
+
+		public event EventHandler<KeyboardEventArgs> KeyDown;
+		public event EventHandler<KeyboardEventArgs> KeyUp;
 
 		public event EventHandler<MouseEventArgs> MouseEnter;
 		public event EventHandler<MouseEventArgs> MouseLeave;
-		public event EventHandler<MouseButtonEventArgs> MouseDown;
-		public event EventHandler<MouseMoveEventArgs> MouseMove;
-		public event EventHandler<MouseButtonEventArgs> MouseUp;
-		public event EventHandler<MouseWheelEventArgs> MouseWheel;
+		public event EventHandler<MouseEventArgs> MouseDown;
+		public event EventHandler<MouseEventArgs> MouseMove;
+		public event EventHandler<MouseEventArgs> MouseUp;
+		public event EventHandler<MouseEventArgs> MouseWheel;
 
 		private bool isHovered = false;
 
@@ -69,21 +79,21 @@ namespace Solid.UI
 
 		#region Input Handling
 
-		protected internal void OnKeyDown(KeyboardKeyEventArgs e)
+		protected internal void OnKeyDown(KeyboardEventArgs e)
 		{
 			this.KeyDown?.Invoke(this, e);
 		}
 
-		protected internal void OnKeyPress(KeyPressEventArgs e)
+		protected internal void OnTextInput(TextInputEventArgs e)
 		{
-			this.KeyPress?.Invoke(this, e);
+			this.TextInput?.Invoke(this, e);
 		}
 
-		protected internal void OnKeyUp(KeyboardKeyEventArgs e)
+		protected internal void OnKeyUp(KeyboardEventArgs e)
 		{
 			this.KeyUp?.Invoke(this, e);
 		}
-		
+
 		protected internal void OnMouseEnter(MouseEventArgs e)
 		{
 			this.isHovered = true;
@@ -97,19 +107,19 @@ namespace Solid.UI
 			this.MouseLeave?.Invoke(this, e);
 		}
 
-		protected internal void OnMouseDown(MouseButtonEventArgs e)
+		protected internal void OnMouseDown(MouseEventArgs e)
 		{
 			if (e.Button == MouseButton.Left)
 				this.isPressed = true;
 			this.MouseDown?.Invoke(this, e);
 		}
 
-		protected internal void OnMouseMove(MouseMoveEventArgs e)
+		protected internal void OnMouseMove(MouseEventArgs e)
 		{
 			this.MouseMove?.Invoke(this, e);
 		}
 
-		protected internal void OnMouseUp(MouseButtonEventArgs e)
+		protected internal void OnMouseUp(MouseEventArgs e)
 		{
 			if (e.Button == MouseButton.Left)
 			{
@@ -119,7 +129,7 @@ namespace Solid.UI
 			this.MouseUp?.Invoke(this, e);
 		}
 
-		protected internal void OnMouseWheel(MouseWheelEventArgs e)
+		protected internal void OnMouseWheel(MouseEventArgs e)
 		{
 			this.MouseWheel?.Invoke(this, e);
 		}
@@ -139,14 +149,12 @@ namespace Solid.UI
 		/// <summary>
 		/// Draws the widget.
 		/// </summary>
-		public void Draw(WidgetDrawMode mode)
+		public void Draw(WidgetDrawMode mode, IGraphics graphics)
 		{
-			if (this.UserInterface == null)
-				throw new InvalidOperationException("Cannot draw a user control without a associated user interface.");
 			if (mode.HasFlag(WidgetDrawMode.PreChildren))
-				this.OnDrawPreChildren();
+				this.OnDrawPreChildren(graphics);
 			if (mode.HasFlag(WidgetDrawMode.PostChildren))
-				this.OnDrawPostChildren();
+				this.OnDrawPostChildren(graphics);
 		}
 
 		protected virtual StyleKey GetCurrentStyleKey()
@@ -161,23 +169,28 @@ namespace Solid.UI
 		/// <summary>
 		/// Implements the widget specific draw routines.
 		/// </summary>
-		protected virtual void OnDrawPreChildren()
+		protected virtual void OnDrawPreChildren(IGraphics graphics)
 		{
-			var g = this.UserInterface;
-
-			var key = this.GetType().Name;
-			if (string.IsNullOrWhiteSpace(this.Background) == false)
-				key = this.Background;
-
-			g.RenderStyleBrush(key, this.GetCurrentStyleKey(), this.GetClientRectangle());
+			RenderStyleBrush(graphics, false);
 		}
 
-		protected virtual void OnDrawPostChildren()
+		private void RenderStyleBrush(IGraphics graphics, bool foreground)
 		{
-			var g = this.UserInterface;
+			var styleKey = this.GetCurrentStyleKey();
+			var style = this.Style;
+			if (style == null)
+				return;
+			var brush = style.GetBrush(styleKey, foreground);
+			if (brush == null)
+				return;
+			graphics.DrawBrush(
+				brush,
+				this.GetClientRectangle());
+		}
 
-			if (string.IsNullOrWhiteSpace(this.Foreground) == false)
-				g.RenderStyleBrush(this.Foreground, this.GetCurrentStyleKey(), this.GetClientRectangle());
+		protected virtual void OnDrawPostChildren(IGraphics graphics)
+		{
+			RenderStyleBrush(graphics, true);
 		}
 
 		/// <summary>
@@ -203,31 +216,17 @@ namespace Solid.UI
 		public Point PointToInterface(Point pt) => (pt + this.Position);
 
 		/// <summary>
-		/// Gets the associated user interface.
-		/// </summary>
-		public UserInterface UserInterface { get; internal set; }
-
-		/// <summary>
 		/// Gets if the mouse hovers the control.
 		/// </summary>
 		public bool IsHovered => this.isHovered;
 
 		/// <summary>
-		/// Gets or sets the background skin.
+		/// Gets or sets the style of the widget.
 		/// </summary>
-		public string Background
+		public Style Style
 		{
-			get { return Get<string>(BackgroundProperty); }
-			set { Set(BackgroundProperty, value); }
-		}
-
-		/// <summary>
-		/// Gets or sets the foreground skin.
-		/// </summary>
-		public string Foreground
-		{
-			get { return Get<string>(ForegroundProperty); }
-			set { Set(ForegroundProperty, value); }
+			get { return Get<Style>(StyleProperty); }
+			set { Set(StyleProperty, value); }
 		}
 
 		/// <summary>

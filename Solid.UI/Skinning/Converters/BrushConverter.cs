@@ -1,12 +1,18 @@
-﻿using SharpFont;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Globalization;
 
-namespace Solid.UI
+namespace Solid.UI.Skinning.Converters
 {
-	public class FaceConverter : TypeConverter
+	internal class BrushConverter : TypeConverter
 	{
+		private IGraphicsObjectFactory objectFactory;
+
+		public BrushConverter(IGraphicsObjectFactory objectFactory)
+		{
+			this.objectFactory = objectFactory;
+		}
+
 		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
 		{
 			if (sourceType == typeof(string))
@@ -18,10 +24,9 @@ namespace Solid.UI
 
 		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
 		{
-			if(value is string)
+			if (value is string)
 			{
-				var text = (string)value;
-				return UserInterface.ResourceLoader.LoadFont(text);
+				return this.objectFactory.CreateBrush((string)value);
 			}
 			return base.ConvertFrom(context, culture, value);
 		}

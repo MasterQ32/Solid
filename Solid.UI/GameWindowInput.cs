@@ -1,5 +1,6 @@
 ﻿namespace Solid.UI
 {
+	/*
 	using OpenTK;
 	using System;
 	using System.Collections.Generic;
@@ -71,4 +72,5 @@
 			this.current = null;
 		}
 	}
+	*/
 }

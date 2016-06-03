@@ -1,111 +1,215 @@
-﻿using OpenTK;
-using OpenTK.Graphics;
-using OpenTK.Graphics.OpenGL4;
-using Solid.UI.Skinning;
+﻿using Solid.UI.Skinning;
 using System;
+using System.Drawing;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using OpenTK.Input;
+using System.Windows.Forms;
+
+using Color = System.Drawing.Color;
+using Rectangle = System.Drawing.Rectangle;
+using Solid.Layout;
+using System.IO;
+using System.ComponentModel;
 
 namespace Solid.UI.Demo
 {
-	class UIDemoProgram : GameWindow
+	class UIDemoProgram : System.Windows.Forms.Form, IGraphicsObjectFactory
 	{
 		static void Main(string[] args)
 		{
-			using (var demo = new UIDemoProgram())
-			{
-				demo.Run(60, 60);
-			}
+			Application.Run(new UIDemoProgram());
 		}
 
 		UserInterface ui;
+		private readonly VirtualGraphics graphics;
+		
 
-		public UIDemoProgram() :
-			base(
-				1280, 720,
-				GraphicsMode.Default,
-				"Solid UI Demonstration",
-				GameWindowFlags.Default,
-				DisplayDevice.Default,
-				3, 3,
-				GraphicsContextFlags.Debug | GraphicsContextFlags.ForwardCompatible)
+		public UIDemoProgram()
 		{
-			this.ui = UserInterface.Load("userinterface.sml");
-			this.ui.Input = new GameWindowInput(this);
-			this.ui.ViewModel = new GameViewModel();
-		}
+			this.graphics = new VirtualGraphics(this, this.CreateGraphics());
 
-		protected override void OnLoad(EventArgs e)
-		{
-			GL.DebugMessageCallback(this.Callback, IntPtr.Zero);
+			this.ui = new UserInterface();
+			this.ui.Skin = Skin.Load(this, "skin.sml");
+			this.ui.Input = new WindowsFormsInput(this);
 
-			this.ui.InitializeOpenGL();
-			this.ui.Skin = Skin.Load("skin.sml");
-		}
+			var form = Form.Load("userinterface.sml");
+			form.ViewModel = new GameViewModel();
 
-		protected override void OnKeyDown(KeyboardKeyEventArgs e)
-		{
-			base.OnKeyDown(e);
-		}
+			this.ui.CurrentForm = form;
 
-		private void Callback(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr message, IntPtr userParam)
-		{
-			var msg = Marshal.PtrToStringAnsi(message, length);
+			var timer = new Timer() { Interval = 25 };
+			timer.Tick += (s, e) => { this.ui.Update(this.graphics); this.Invalidate(); };
+			timer.Start();
 
-			switch (severity)
-			{
-				case DebugSeverity.DebugSeverityHigh:
-				{
-					Console.ForegroundColor = ConsoleColor.Red;
-					break;
-				}
-				case DebugSeverity.DebugSeverityMedium:
-				{
-					Console.ForegroundColor = ConsoleColor.DarkYellow;
-					break;
-				}
-				case DebugSeverity.DebugSeverityLow:
-				{
-					Console.ForegroundColor = ConsoleColor.Yellow;
-					break;
-				}
-				default:
-				case DebugSeverity.DebugSeverityNotification:
-				{
-					Console.ForegroundColor = ConsoleColor.White;
-					break;
-				}
-			}
-			
-			Console.WriteLine("[{0}] {1}", source, msg);
-
-			if (severity == DebugSeverity.DebugSeverityHigh)
-				System.Diagnostics.Debugger.Break();
+			this.DoubleBuffered = true;
+			this.ClientSize = new System.Drawing.Size(800, 600);
 		}
 
 		protected override void OnResize(EventArgs e)
 		{
-			GL.Viewport(0, 0, this.Width, this.Height);
+			this.ui.Update(this.graphics);
+			this.Invalidate();
 		}
 
-		protected override void OnUpdateFrame(FrameEventArgs e)
+		protected override void OnPaintBackground(PaintEventArgs e)
 		{
-			this.ui.Update(new Layout.Size(this.Width, this.Height));
+			e.Graphics.Clear(Color.Wheat);
 		}
 
-		protected override void OnRenderFrame(FrameEventArgs e)
+		protected override void OnPaint(PaintEventArgs e)
 		{
-			GL.ClearColor(Color4.CornflowerBlue);
-			GL.ClearDepth(1.0f);
-			GL.Clear(ClearBufferMask.ColorBufferBit);
+			this.graphics.graphics = e.Graphics;
+			this.ui.Draw(this.graphics);
+		}
 
-			this.ui.Draw();
+		public IBrush CreateBrush(string spec)
+		{
+			if (Path.GetExtension(spec) != "")
+				return new VirtualBrush(new Bitmap(spec));
+			else
+				return new VirtualBrush(new SolidBrush(System.Drawing.Color.FromName(spec)));
+		}
 
-			this.SwapBuffers();
+		public IFont CreateFont(string spec)
+		{
+			var converter = TypeDescriptor.GetConverter(typeof(Font));
+			var font = (Font)converter.ConvertFromString(spec) ?? this.Font;
+			return new VirtualFont(this.graphics.graphics, font);
+		}
+	}
+
+	sealed class VirtualGraphics : IGraphics
+	{
+		private readonly System.Windows.Forms.Form form;
+		internal Graphics graphics;
+
+		public VirtualGraphics(System.Windows.Forms.Form form, Graphics g)
+		{
+			this.form = form;
+			this.graphics = g;
+		}
+
+		public Layout.Size ScreenSize => new Layout.Size(this.form.ClientSize.Width, this.form.ClientSize.Height);
+
+		private static float Clamp(float v, float min, float max)
+		{
+			if (v < min) return min;
+			if (v > max) return max;
+			return v;
+		}
+
+		private static Color ConvertColor(Skinning.Color c)
+		{
+			return Color.FromArgb(
+				(int)Clamp(255.0f * c.A, 0, 255),
+				(int)Clamp(255.0f * c.R, 0, 255),
+				(int)Clamp(255.0f * c.G, 0, 255),
+				(int)Clamp(255.0f * c.B, 0, 255));
+		}
+
+		private static RectangleF ConvertRectangle(UI.Rectangle rect)
+		{
+			return new RectangleF(rect.X, rect.Y, rect.Width, rect.Height);
+		}
+
+		public void Clear(Skinning.Color color)
+		{
+			this.graphics.Clear(ConvertColor(color));
+		}
+
+		public void DrawBrush(IBrush iBrush, UI.Rectangle target)
+		{
+			var brush = (VirtualBrush)iBrush;
+
+			if (brush.Bitmap != null)
+			{
+				graphics.DrawImage(brush.Bitmap, ConvertRectangle(target));
+			}
+			else
+			{
+				graphics.FillRectangle(
+					brush.Brush,
+					ConvertRectangle(target));
+			}
+		}
+
+		public void DrawString(IFont iFont, Skinning.Color color, UI.Rectangle target, string text)
+		{
+			var font = (VirtualFont)iFont;
+
+			graphics.DrawString(
+				text,
+				font.Font,
+				new SolidBrush(ConvertColor(color)),
+				ConvertRectangle(target));
+		}
+
+		public Layout.Size MeasureString(IFont iFont, string text, float? maxWidth = default(float?))
+		{
+			var font = (VirtualFont)iFont;
+
+			SizeF size;
+			if (maxWidth != null)
+				size = graphics.MeasureString(text, font.Font, (int)maxWidth);
+			else
+				size = graphics.MeasureString(text, font.Font);
+
+			return new Layout.Size(size.Width, size.Height);
+		}
+
+		public void ResetScissor()
+		{
+			graphics.ResetClip();
+		}
+
+		public void SetScissor(UI.Rectangle rect)
+		{
+			graphics.SetClip(ConvertRectangle(rect));
+		}
+	}
+
+	sealed class VirtualBrush : IBrush
+	{
+		public VirtualBrush(Bitmap bitmap)
+		{
+			this.Bitmap = bitmap;
+		}
+
+		public VirtualBrush(Brush brush)
+		{
+			this.Brush = brush;
+		}
+
+		public Bitmap Bitmap { get; private set; }
+		public Brush Brush { get; private set; }
+	}
+
+	sealed class VirtualFont : IFont
+	{
+		private readonly Graphics graphics;
+
+		public VirtualFont(Graphics g, Font font)
+		{
+			this.graphics = g;
+			this.Font = font;
+		}
+
+		public Font Font { get; private set; }
+
+		public Layout.Size Measure(string text, float? maxWidth = default(float?))
+		{
+			if (maxWidth != null)
+				return Convert(graphics.MeasureString(text, this.Font, (int)maxWidth));
+			else
+				return Convert(graphics.MeasureString(text, this.Font));
+		}
+
+		static Layout.Size Convert(System.Drawing.SizeF s)
+		{
+			return new Layout.Size(s.Width, s.Height);
 		}
 	}
 }

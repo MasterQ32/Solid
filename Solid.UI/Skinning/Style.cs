@@ -9,8 +9,8 @@
 
 		public static readonly SolidProperty FontSizeProperty = SolidProperty.Register<Style, int>(nameof(FontSize), 16);
 
-		public static readonly SolidProperty FontColorProperty = SolidProperty.Register<Style, Color4>(nameof(FontColor), Color4.Black);
-		
+		public static readonly SolidProperty FontColorProperty = SolidProperty.Register<Style, Color>(nameof(FontColor), new Color(0.0f, 0.0f, 0.0f));
+
 		public static readonly SolidProperty MarginProperty = SolidProperty.Register<Style, Thickness>(nameof(Margin));
 
 		public static readonly SolidProperty PaddingProperty = SolidProperty.Register<Style, Thickness>(nameof(Padding));
@@ -21,58 +21,81 @@
 
 		public static readonly SolidProperty SizeProperty = SolidProperty.Register<Style, Size>(nameof(Size));
 
-		public IBrush Default { get; set; }
 
-		public IBrush Hovered { get; set; }
+		public static readonly SolidProperty BackgroundProperty = SolidProperty.Register<Style, IBrush>(nameof(Background));
 
-		public IBrush Active { get; set; }
+		public static readonly SolidProperty BackgroundHoveredProperty = SolidProperty.Register<Style, IBrush>(nameof(BackgroundHovered));
 
-		public IBrush Disabled { get; set; }
+		public IBrush Background
+		{
+			get { return Get<IBrush>(BackgroundProperty); }
+			set { Set(BackgroundProperty, value); }
+		}
+
+		public IBrush Foreground { get; set; }
+
+		public IBrush BackgroundHovered
+		{
+			get { return Get<IBrush>(BackgroundHoveredProperty); }
+			set { Set(BackgroundHoveredProperty, value); }
+		}
+
+		public IBrush BackgroundActive { get; set; }
+
+		public IBrush BackgroundDisabled { get; set; }
+
+		public IBrush ForegroundHovered { get; set; }
+
+		public IBrush ForegroundActive { get; set; }
+
+		public IBrush ForegroundDisabled { get; set; }
 
 		/// <summary>
 		/// Gets the brush for the given style key. If no brush is available for this key, the default brush will be returned.
 		/// </summary>
 		/// <param name="key"></param>
+		/// <param name="foreground"></param>
 		/// <returns></returns>
-		public IBrush GetBrush(StyleKey key)
+		public IBrush GetBrush(StyleKey key, bool foreground)
 		{
-			switch(key)
+			if (foreground)
 			{
-				case StyleKey.Default: return this.Default;
-				case StyleKey.Hovered: return this.Hovered ?? this.Default;
-				case StyleKey.Active: return this.Active ?? this.Default;
-				case StyleKey.Disabled: return this.Disabled ?? this.Default;
-				default: throw new ArgumentException("The given key is not a valid style key.", nameof(key));
+				switch (key)
+				{
+					case StyleKey.Default: return this.Foreground;
+					case StyleKey.Hovered: return this.ForegroundHovered ?? this.Foreground;
+					case StyleKey.Active: return this.ForegroundActive ?? this.Foreground;
+					case StyleKey.Disabled: return this.ForegroundDisabled ?? this.Foreground;
+					default: throw new ArgumentException("The given key is not a valid style key.", nameof(key));
+				}
+			}
+			else
+			{
+				switch (key)
+				{
+					case StyleKey.Default: return this.Background;
+					case StyleKey.Hovered: return this.BackgroundHovered ?? this.Background;
+					case StyleKey.Active: return this.BackgroundActive ?? this.Background;
+					case StyleKey.Disabled: return this.BackgroundDisabled ?? this.Background;
+					default: throw new ArgumentException("The given key is not a valid style key.", nameof(key));
+				}
 			}
 		}
 
 		void INamedNodeContainer.SetChildNodeName(object child, string name)
 		{
+			/*
 			var brushDescriptor = (BrushDescriptor)child;
 			switch (name)
 			{
-				case nameof(Default):
+				case "Background":
 				{
-					this.Default = brushDescriptor.CreateBrush();
-					break;
-				}
-				case nameof(Hovered):
-				{
-					this.Hovered = brushDescriptor.CreateBrush();
-					break;
-				}
-				case nameof(Active):
-				{
-					this.Active = brushDescriptor.CreateBrush();
-					break;
-				}
-				case nameof(Disabled):
-				{
-					this.Disabled = brushDescriptor.CreateBrush();
+					this.Background = brushDescriptor.CreateBrush();
 					break;
 				}
 				default: throw new NotSupportedException($"The {name} is not a valid style option.");
 			}
+			*/
 		}
 
 		public void SetChildNodeName(object child, string name)
@@ -92,9 +115,9 @@
 			set { Set(FontSizeProperty, value); }
 		}
 
-		public Color4 FontColor
+		public Color FontColor
 		{
-			get { return Get<Color4>(FontColorProperty); }
+			get { return Get<Color>(FontColorProperty); }
 			set { Set(FontColorProperty, value); }
 		}
 
@@ -166,13 +189,5 @@
 			}
 		}
 
-	}
-
-	public enum StyleKey
-	{
-		Default,
-		Hovered,
-		Active,
-		Disabled,
 	}
 }

@@ -4,69 +4,65 @@ using System;
 using Solid.UI.Skinning;
 using System.IO;
 using System.Collections.Generic;
+using Solid.UI.Input;
 
 namespace Solid.UI
 {
-	public class UserInterface : LayoutDocument
+	public class UserInterface
 	{
-		private Layout.Size screenSize;
 		private InputSource input;
+		private Form form;
 
 		private UIWidget currentMouseWidget;
 
-		private FontTextureBrush fontBrush;
-
-		public UserInterface() :
-			base(new UIMapper())
+		public UserInterface()
 		{
 		
 		}
 
-		public object ViewModel
+		public Form CurrentForm
 		{
-			get { return this.Root.BindingSource; }
-			set { this.Root.BindingSource = value; }
+			get { return this.form; }
+			set
+			{
+				if (value == this.form)
+					return;
+				if (value?.UI != null)
+					throw new InvalidOperationException("This form is already bound to another user interface.");
+				if (this.form != null) this.form.UI = null;
+				this.form = value;
+				if (this.form != null) this.form.UI = this;
+			}
 		}
 
-		protected override void OnNodeCreation(Widget node)
+		public void Update(IGraphics graphics)
 		{
-			var uiElement = node as UIWidget;
-			if (uiElement == null)
-				return;
-			uiElement.UserInterface = this;
+			this.CurrentForm.Update(graphics.ScreenSize);
 		}
 
-		protected override void OnPostLayout(Layout.Size size)
-		{
-			this.screenSize = size;
-		}
-
-		private void Draw(Widget widget)
+		private void Draw(Widget widget, IGraphics graphics)
 		{
 			var drawable = widget as UIWidget;
 			if (drawable != null)
 			{
 				var rect = drawable.GetClientRectangle();
-				rect.Y = (int)(screenSize.Height - rect.Y - rect.Height);
-
-				// GL.Scissor((int)rect.X, (int)rect.Y, (int)rect.Width, (int)rect.Height);
-				drawable?.Draw(WidgetDrawMode.PreChildren);
+				graphics.SetScissor(rect);
+				drawable?.Draw(WidgetDrawMode.PreChildren, graphics);
 			}
 			foreach (var child in widget.Children)
-				Draw(child);
+				Draw(child, graphics);
 			if (drawable != null)
 			{
 				var rect = drawable.GetClientRectangle();
-				rect.Y = (int)(screenSize.Height - rect.Y - rect.Height);
-
-				// GL.Scissor((int)rect.X, (int)rect.Y, (int)rect.Width, (int)rect.Height);
-				drawable?.Draw(WidgetDrawMode.PostChildren);
+				graphics.SetScissor(rect);
+				drawable?.Draw(WidgetDrawMode.PostChildren, graphics);
 			}
 		}
 
-		public void Draw()
+		public void Draw(IGraphics graphics)
 		{
-			this.Draw(this.Root);
+			graphics.ResetScissor();
+			this.Draw(this.CurrentForm.Root, graphics);
 		}
 		
 		private void BindInput()
@@ -80,7 +76,7 @@ namespace Solid.UI
 			this.input.MouseWheel += Input_MouseWheel;
 
 			this.input.KeyDown += Input_KeyDown;
-			this.input.KeyPress += Input_KeyPress;
+			this.input.TextInput += Input_TextInput;
 			this.input.KeyUp += Input_KeyUp;
 		}
 
@@ -105,7 +101,7 @@ namespace Solid.UI
 
 		#region Input Handling
 
-		private UIWidget GetWidgetFromPosition(Point pt) => this.GetWidgetFromPosition(this.Root, pt);
+		private UIWidget GetWidgetFromPosition(Point pt) => this.GetWidgetFromPosition(this.CurrentForm.Root, pt);
 
 		private UIWidget GetWidgetFromPosition(Widget widget, Point pt)
 		{
@@ -129,31 +125,30 @@ namespace Solid.UI
 				return null;
 			}
 		}
-
-		/*
-		private void Input_MouseWheel(object sender, OpenTK.Input.MouseWheelEventArgs e)
+		
+		private void Input_MouseWheel(object sender, MouseEventArgs e)
 		{
 			var ipos = new Point(e.X, e.Y);
 			var widget = this.GetWidgetFromPosition(ipos);
 			if (widget != null)
 			{
 				var cpos = widget.PointToClient(ipos);
-				widget.OnMouseWheel(new MouseWheelEventArgs((int)cpos.X, (int)cpos.Y, e.Value, e.Delta));
+				widget.OnMouseWheel(MouseEventArgs.CreateWheel((int)cpos.X, (int)cpos.Y, e.WheelDelta));
 			}
 		}
 
-		private void Input_MouseUp(object sender, OpenTK.Input.MouseButtonEventArgs e)
+		private void Input_MouseUp(object sender, MouseEventArgs e)
 		{
 			var ipos = new Point(e.X, e.Y);
 			var widget = this.GetWidgetFromPosition(ipos);
 			if (widget != null)
 			{
 				var cpos = widget.PointToClient(ipos);
-				widget.OnMouseUp(new MouseButtonEventArgs((int)cpos.X, (int)cpos.Y, e.Button, e.IsPressed));
+				widget.OnMouseUp(MouseEventArgs.CreateButtonUp((int)cpos.X, (int)cpos.Y, e.Button));
 			}
 		}
 
-		private void Input_MouseMove(object sender, OpenTK.Input.MouseMoveEventArgs e)
+		private void Input_MouseMove(object sender, MouseEventArgs e)
 		{
 			var ipos = new Point(e.X, e.Y);
 			var widget = this.GetWidgetFromPosition(ipos);
@@ -163,84 +158,47 @@ namespace Solid.UI
 				if (this.currentMouseWidget != null)
 				{
 					var localPos = this.currentMouseWidget.PointToClient(ipos);
-					this.currentMouseWidget.OnMouseLeave(new MouseEventArgs((int)localPos.X, (int)localPos.Y));
+					this.currentMouseWidget.OnMouseLeave(MouseEventArgs.CreateLeave((int)localPos.X, (int)localPos.Y));
 				}
 				this.currentMouseWidget = widget;
 				if (this.currentMouseWidget != null)
 				{
 					var localPos = this.currentMouseWidget.PointToClient(ipos);
-					this.currentMouseWidget.OnMouseEnter(new MouseEventArgs((int)localPos.X, (int)localPos.Y));
+					this.currentMouseWidget.OnMouseEnter(MouseEventArgs.CreateEnter((int)localPos.X, (int)localPos.Y));
 				}
 			}
 			if (widget == null)
 				return;
 			var cpos = widget.PointToClient(ipos);
-			widget.OnMouseMove(new MouseMoveEventArgs((int)cpos.X, (int)cpos.Y, e.XDelta, e.YDelta));
+			widget.OnMouseMove(MouseEventArgs.CreateMovement((int)cpos.X, (int)cpos.Y));
 		}
 
-		private void Input_MouseDown(object sender, OpenTK.Input.MouseButtonEventArgs e)
+		private void Input_MouseDown(object sender, MouseEventArgs e)
 		{
 			var ipos = new Point(e.X, e.Y);
 			var widget = this.GetWidgetFromPosition(ipos);
 			if (widget != null)
 			{
 				var cpos = widget.PointToClient(ipos);
-				widget.OnMouseDown(new MouseButtonEventArgs((int)cpos.X, (int)cpos.Y, e.Button, e.IsPressed));
+				widget.OnMouseDown(MouseEventArgs.CreateButtonDown((int)cpos.X, (int)cpos.Y, e.Button));
 			}
 		}
 
-		private void Input_KeyUp(object sender, OpenTK.Input.KeyboardKeyEventArgs e)
+		private void Input_KeyUp(object sender, KeyboardEventArgs e)
 		{
 
 		}
 
-		private void Input_KeyPress(object sender, OpenTK.KeyPressEventArgs e)
+		private void Input_TextInput(object sender, TextInputEventArgs e)
 		{
 
 		}
 
-		private void Input_KeyDown(object sender, OpenTK.Input.KeyboardKeyEventArgs e)
+		private void Input_KeyDown(object sender, KeyboardEventArgs e)
 		{
 
 		}
-		*/
 
 		#endregion
-
-		private static readonly Dictionary<string, Type> customTypes = new Dictionary<string, Type>();
-
-		public static void RegisterCustomWidget<T>(string name)
-			where T : UIWidget
-		{
-			lock(customTypes)
-				customTypes.Add(name, typeof(T));
-		}
-
-		public static void RegisterCustomWidget<T>()
-			where T : UIWidget
-			=> RegisterCustomWidget<T>(typeof(T).Name);
-
-		public static UserInterface Load(string fileName)
-		{
-			var document = Parser.Load(fileName);
-			return Create(document);
-		}
-
-		public static UserInterface Load(Stream stream, System.Text.Encoding encoding)
-		{
-			var document = Parser.Parse(stream, encoding);
-			return Create(document);
-		}
-
-		private static UserInterface Create(MarkupDocument document)
-		{
-			var mapper = new UIMapper();
-			lock (customTypes)
-			{
-				foreach (var ctype in customTypes)
-					mapper.RegisterType(ctype.Value, ctype.Key);
-			}
-			return mapper.Instantiate(document);
-		}
 	}
 }

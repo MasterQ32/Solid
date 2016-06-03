@@ -59,7 +59,6 @@ namespace Solid.Markup
 			if (markupProperty.Type == MarkupPropertyType.Binding)
 			{
 				SolidProperty.Bind(property, obj, markupProperty.Value);
-				// throw new NotSupportedException("Bindings of SolidProperty is not supported yet.");
 				return;
 			}
 

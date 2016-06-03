@@ -27,20 +27,20 @@ namespace Solid.UI.Skinning
 		public Style Label => this["Label"];
 		public Style Window => this["Window"];
 
-		public static Skin Load(string fileName)
+		public static Skin Load(IGraphicsObjectFactory objectFactory, string fileName)
 		{
 			var document = Parser.Load(fileName);
 
-			var skinMapper = new SkinMapper();
+			var skinMapper = new SkinMapper(objectFactory);
 
 			return skinMapper.Instantiate(document);
 		}
 
-		public static Skin Load(Stream stream, Encoding encoding)
+		public static Skin Load(IGraphicsObjectFactory objectFactory, Stream stream, Encoding encoding)
 		{
 			var document = Parser.Parse(stream, encoding);
 
-			var skinMapper = new SkinMapper();
+			var skinMapper = new SkinMapper(objectFactory);
 
 			return skinMapper.Instantiate(document);
 		}

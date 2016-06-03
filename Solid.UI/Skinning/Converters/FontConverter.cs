@@ -1,14 +1,17 @@
-﻿namespace Solid.UI
-{
-	using OpenTK.Graphics;
-	using System;
-	using System.ComponentModel;
-	using System.Drawing;
-	using System.Globalization;
+﻿using System;
+using System.ComponentModel;
+using System.Globalization;
 
-	public class Color4Converter : TypeConverter
+namespace Solid.UI.Skinning.Converters
+{
+	public sealed class FontConverter : TypeConverter
 	{
-		private readonly ColorConverter colorConverter = new ColorConverter();
+		private readonly IGraphicsObjectFactory objectFactory;
+
+		public FontConverter(IGraphicsObjectFactory objectFactory)
+		{
+			this.objectFactory = objectFactory;
+		}
 
 		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
 		{
@@ -23,8 +26,7 @@
 		{
 			if (value is string)
 			{
-				var text = (string)value;
-				return (Color4)(Color)colorConverter.ConvertFrom(context, culture, value);
+				return this.objectFactory.CreateFont((string)value);
 			}
 			return base.ConvertFrom(context, culture, value);
 		}

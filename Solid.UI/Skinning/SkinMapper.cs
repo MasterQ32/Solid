@@ -1,7 +1,6 @@
-﻿using OpenTK.Graphics;
-using SharpFont;
-using Solid.Layout;
+﻿using Solid.Layout;
 using Solid.Markup;
+using Solid.UI.Skinning.Converters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,14 +11,17 @@ namespace Solid.UI.Skinning
 {
 	public sealed class SkinMapper : SolidMapper<SolidObject>
 	{
-		public SkinMapper()
+		public SkinMapper(IGraphicsObjectFactory objectFactory)
 		{
 			this.RegisterType<Skin>();
 			this.RegisterType<Style>();
 
-			this.RegisterType<TextureBrushDescriptor>("Texture");
-			this.RegisterType<SolidBrushDescriptor>("Color");
-			this.RegisterType<TextureBoxBrushDescriptor>("TextureBox");
+			this.RegisterConverter<IFont>(new FontConverter(objectFactory));
+			this.RegisterConverter<IBrush>(new BrushConverter(objectFactory));
+
+			// this.RegisterType<TextureBrushDescriptor>("Texture");
+			// this.RegisterType<SolidBrushDescriptor>("Color");
+			// this.RegisterType<TextureBoxBrushDescriptor>("TextureBox");
 
 			this.RegisterConverter<Thickness, ThicknessConverter>();
 			UIMapper.RegisterConverters(this);

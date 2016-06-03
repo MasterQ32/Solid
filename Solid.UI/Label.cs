@@ -1,16 +1,21 @@
 ﻿namespace Solid.UI
 {
-	using OpenTK.Graphics;
-	using SharpFont;
-	using Layout;
 	using System;
+	using Solid.Layout;
+	using Solid.UI.Skinning;
+
 	public class Label : UIWidget
 	{
 		public static SolidProperty TextProperty = SolidProperty.Register<Label, string>(nameof(Text), "");
 
-		public static SolidProperty FontProperty = SolidProperty.Register<Label, string>(nameof(Font), new SolidPropertyMetadata()
+		public static SolidProperty FontProperty = SolidProperty.Register<Label, IFont>(nameof(Font), new SolidPropertyMetadata()
 		{
-			DefaultValue = "Label",
+			InheritFromHierarchy = true,
+		});
+
+		public static SolidProperty FontColorProperty = SolidProperty.Register<Label, Color>(nameof(FontColor), new SolidPropertyMetadata()
+		{
+			DefaultValue = new Color(0, 0, 0),
 			InheritFromHierarchy = true,
 		});
 
@@ -22,13 +27,14 @@
 			this.IsTouchable = false;
 			this.VerticalAlignment = VerticalAlignment.Center;
 			this.HorizontalAlignment = HorizontalAlignment.Center;
+
+			ExtendDefaultGen(FontProperty, (style) => style.Font);
+			ExtendDefaultGen(FontColorProperty, (style) => style.FontColor);
 		}
 
-		protected override void OnDrawPreChildren()
+		protected override void OnDrawPreChildren(IGraphics graphics)
 		{
-			var g = this.UserInterface;
-
-			base.OnDrawPreChildren();
+			base.OnDrawPreChildren(graphics);
 
 			var rect = this.GetClientRectangle();
 
@@ -36,18 +42,20 @@
 			rect.Y = (int)Math.Round(rect.Y, MidpointRounding.AwayFromZero) + TextPadding;
 			rect.Width -= TextPadding2;
 			rect.Height -= TextPadding2;
-			g.RenderString(
-				this.Text,
-				rect,
+			if (this.Font == null)
+				return;
+			graphics.DrawString(
 				this.Font,
-				false);
+				this.FontColor,
+				rect,
+				this.Text);
 		}
 
 		public override Size SizeHint
 		{
 			get
 			{
-				var size = this.UserInterface.RenderString(this.Text, this.GetClientRectangle(), this.Font, true).Size;
+				var size = this.Font.Measure(this.Text);
 				size.Width += TextPadding2;
 				size.Height += TextPadding2;
 				return size;
@@ -60,10 +68,16 @@
 			set { Set(TextProperty, value); }
 		}
 
-		public string Font
+		public IFont Font
 		{
-			get { return Get<string>(FontProperty); }
-			set { Set(TextProperty, value); }
+			get { return Get<IFont>(FontProperty); }
+			set { Set(FontProperty, value); }
+		}
+
+		public Color FontColor
+		{
+			get { return Get<Color>(FontColorProperty); }
+			set { Set(FontColorProperty, value); }
 		}
 	}
 }

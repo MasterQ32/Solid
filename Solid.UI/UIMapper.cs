@@ -5,27 +5,24 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Solid.Markup;
-using OpenTK.Graphics;
-using System.Drawing;
 using Solid.UI.Skinning;
-using SharpFont;
+using Solid.UI.Converters;
 
 namespace Solid.UI
 {
 	public class UIMapper : LayoutMapper
 	{
-		protected override IMarkupDocument<Widget> CreateDocument() => new UserInterface();
+		protected override IMarkupDocument<Widget> CreateDocument() => new Form();
 
 		public static void RegisterConverters<T>(MarkupMapper<T> mapper)
 			where T : class
 		{
 			mapper.RegisterConverter<Color, ColorConverter>();
-			mapper.RegisterConverter<Brush, BrushConverter>();
-			mapper.RegisterConverter<Skin, SkinConverter>();
+			// mapper.RegisterConverter<Brush, BrushConverter>();
+			// mapper.RegisterConverter<Skin, SkinConverter>();
 			mapper.RegisterConverter<Rectangle, RectangleConverter>();
-			mapper.RegisterConverter<Face, FaceConverter>();
-			mapper.RegisterConverter<Color4, Color4Converter>();
-			mapper.RegisterConverter<Texture, TextureConverter>();
+			//mapper.RegisterConverter<Face, FaceConverter>();
+			//mapper.RegisterConverter<Texture, TextureConverter>();
 		}
 
 		public UIMapper()
@@ -34,7 +31,7 @@ namespace Solid.UI
 			
 			this.RegisterType<Button>();
 			this.RegisterType<Label>();
-			this.RegisterType<Image>();
+			// this.RegisterType<Image>();
 		}
 
 		protected override Widget CreateNode(string nodeClass)
@@ -48,6 +45,6 @@ namespace Solid.UI
 			}
 		}
 
-		public new UserInterface Instantiate(MarkupDocument document) => (UserInterface)this.Map(document);
+		public new Form Instantiate(MarkupDocument document) => (Form)this.Map(document);
 	}
 }
