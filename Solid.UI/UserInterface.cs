@@ -19,7 +19,7 @@ namespace Solid.UI
 		public UserInterface() :
 			base(new UIMapper())
 		{
-			
+		
 		}
 
 		public object ViewModel
