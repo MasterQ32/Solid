@@ -74,7 +74,8 @@ namespace Solid
 		/// <param name="value"></param>
 		protected internal void Set(SolidProperty property, object value)
 		{
-			GetValueHolder(property).Value = value;
+			var vh = GetValueHolder(property);
+			vh.Value = value;
 		}
 
 		/// <summary>
@@ -84,12 +85,14 @@ namespace Solid
 		/// <returns></returns>
 		protected internal object Get(SolidProperty property)
 		{
-			return GetValueHolder(property).Value;
+			var vh = GetValueHolder(property);
+			return vh.Value;
 		}
 
 		internal void SetPropertyBinding(SolidProperty property, string targetPropertyName)
 		{
-			GetValueHolder(property).Binding = targetPropertyName;
+			var vh = GetValueHolder(property);
+			vh.Binding = targetPropertyName;
 		}
 
 		/// <summary>

@@ -2,13 +2,10 @@
 {
 	using System;
 	using Solid.Markup;
-	using OpenTK.Graphics;
-	using SharpFont;
 	using Layout;
 	public class Style : SolidObject, INamedNodeContainer
 	{
-
-		public static readonly SolidProperty FontProperty = SolidProperty.Register<Style, Face>(nameof(Font));
+		public static readonly SolidProperty FontProperty = SolidProperty.Register<Style, IFont>(nameof(Font));
 
 		public static readonly SolidProperty FontSizeProperty = SolidProperty.Register<Style, int>(nameof(FontSize), 16);
 
@@ -24,20 +21,20 @@
 
 		public static readonly SolidProperty SizeProperty = SolidProperty.Register<Style, Size>(nameof(Size));
 
-		public Brush Default { get; set; }
+		public IBrush Default { get; set; }
 
-		public Brush Hovered { get; set; }
+		public IBrush Hovered { get; set; }
 
-		public Brush Active { get; set; }
+		public IBrush Active { get; set; }
 
-		public Brush Disabled { get; set; }
+		public IBrush Disabled { get; set; }
 
 		/// <summary>
 		/// Gets the brush for the given style key. If no brush is available for this key, the default brush will be returned.
 		/// </summary>
 		/// <param name="key"></param>
 		/// <returns></returns>
-		public Brush GetBrush(StyleKey key)
+		public IBrush GetBrush(StyleKey key)
 		{
 			switch(key)
 			{
@@ -83,9 +80,9 @@
 			throw new NotImplementedException();
 		}
 
-		public Face Font
+		public IFont Font
 		{
-			get { return Get<Face>(FontProperty); }
+			get { return Get<IFont>(FontProperty); }
 			set { Set(FontProperty, value); }
 		}
 

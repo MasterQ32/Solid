@@ -14,6 +14,9 @@
 			InheritFromHierarchy = true,
 		});
 
+		private static int TextPadding = 2;
+		private static int TextPadding2 => 2 * TextPadding;
+
 		public Label()
 		{
 			this.IsTouchable = false;
@@ -29,9 +32,10 @@
 
 			var rect = this.GetClientRectangle();
 
-			rect.X = (int)Math.Round(rect.X, MidpointRounding.AwayFromZero);
-			rect.Y = (int)Math.Round(rect.Y, MidpointRounding.AwayFromZero);
-
+			rect.X = (int)Math.Round(rect.X, MidpointRounding.AwayFromZero) + TextPadding;
+			rect.Y = (int)Math.Round(rect.Y, MidpointRounding.AwayFromZero) + TextPadding;
+			rect.Width -= TextPadding2;
+			rect.Height -= TextPadding2;
 			g.RenderString(
 				this.Text,
 				rect,
@@ -43,7 +47,10 @@
 		{
 			get
 			{
-				return this.UserInterface.RenderString(this.Text, this.GetClientRectangle(), this.Font, true).Size;
+				var size = this.UserInterface.RenderString(this.Text, this.GetClientRectangle(), this.Font, true).Size;
+				size.Width += TextPadding2;
+				size.Height += TextPadding2;
+				return size;
 			}
 		}
 

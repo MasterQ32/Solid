@@ -24,7 +24,7 @@ namespace Solid.UI
 			InheritFromHierarchy = true,
 		});
 
-		public static readonly SolidProperty ClickCommandProperty = SolidProperty.Register<UIWidget, Command>("Click");
+		public static readonly SolidProperty ClickCommandProperty = SolidProperty.Register<UIWidget, Command>(nameof(ClickCommand));
 
 		private static void ExtendDefaultGen(SolidProperty property, Func<Style,object> getValue)
 		{
