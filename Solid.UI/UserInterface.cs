@@ -61,7 +61,7 @@ namespace Solid.UI
 			};
 			this.Skin["Label"] = new Style()
 			{
-				Font = new Face(FontLibrary, @"C:\Windows\Fonts\arial.ttf"),
+				// Font = new Face(FontLibrary, @"C:\Windows\Fonts\arial.ttf"),
 				FontSize = 24,
 				FontColor = Color4.Black,
 			};
