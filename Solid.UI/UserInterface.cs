@@ -37,7 +37,7 @@ namespace Solid.UI
 
 		public void Update(IGraphics graphics)
 		{
-			this.CurrentForm.Update(graphics.ScreenSize);
+			this.CurrentForm?.Update(graphics.ScreenSize);
 		}
 
 		private void Draw(Widget widget, IGraphics graphics)
@@ -101,10 +101,12 @@ namespace Solid.UI
 
 		#region Input Handling
 
-		private UIWidget GetWidgetFromPosition(Point pt) => this.GetWidgetFromPosition(this.CurrentForm.Root, pt);
+		private UIWidget GetWidgetFromPosition(Point pt) => this.GetWidgetFromPosition(this.CurrentForm?.Root, pt);
 
 		private UIWidget GetWidgetFromPosition(Widget widget, Point pt)
 		{
+			if (widget == null)
+				return null;
 			var rect = new Rectangle(widget.Position, widget.Size);
 			if (rect.Contains(pt) == false)
 				return null;

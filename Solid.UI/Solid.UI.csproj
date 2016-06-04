@@ -66,6 +66,7 @@
     <Compile Include="Skinning\Skin.cs" />
     <Compile Include="SkinConverter.cs" />
     <Compile Include="Skinning\SkinMapper.cs" />
+    <Compile Include="Skinning\State.cs" />
     <Compile Include="Skinning\Style.cs" />
     <Compile Include="Input\InputSource.cs" />
     <Compile Include="Skinning\StyleKey.cs" />

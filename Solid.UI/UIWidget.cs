@@ -35,7 +35,7 @@ namespace Solid.UI
 
 		public static readonly SolidProperty ClickCommandProperty = SolidProperty.Register<UIWidget, Command>(nameof(ClickCommand));
 
-		protected static void ExtendDefaultGen(SolidProperty property, Func<Style, object> getValue)
+		protected static void ExtendDefaultGen(SolidProperty property, Func<State, object> getValue)
 		{
 			// Overrides the property defaults of some properties so the style can define the default value.
 			var prevGen = property.Metadata.DefaultGenerator;
@@ -44,9 +44,9 @@ namespace Solid.UI
 				if (obj is UIWidget)
 				{
 					var widget = (UIWidget)obj;
-					var style = widget.Style;
-					if (style != null)
-						return getValue(style);
+					var state = widget?.Style?.GetState(widget.GetCurrentStyleKey());
+					if (state != null)
+						return getValue(state);
 				}
 				return prevGen(obj, prop);
 			};
@@ -54,7 +54,7 @@ namespace Solid.UI
 
 		static UIWidget()
 		{
-			ExtendDefaultGen(MarginProperty, (style) => style.Margin);
+			ExtendDefaultGen(MarginProperty, (state) => state.Margin);
 			ExtendDefaultGen(PaddingProperty, (style) => style.Padding);
 			ExtendDefaultGen(HorizontalAlignmentProperty, (style) => style.HorizontalAlignment);
 			ExtendDefaultGen(VerticalAlignmentProperty, (style) => style.VerticalAlignment);

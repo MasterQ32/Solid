@@ -15,6 +15,7 @@ namespace Solid.UI.Skinning
 		{
 			this.RegisterType<Skin>();
 			this.RegisterType<Style>();
+			this.RegisterType<State>();
 
 			this.RegisterConverter<IFont>(new FontConverter(objectFactory));
 			this.RegisterConverter<IBrush>(new BrushConverter(objectFactory));

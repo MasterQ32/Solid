@@ -20,35 +20,32 @@
 		public static readonly SolidProperty HorizontalAlignmentProperty = SolidProperty.Register<Style, HorizontalAlignment>(nameof(HorizontalAlignment));
 
 		public static readonly SolidProperty SizeProperty = SolidProperty.Register<Style, Size>(nameof(Size));
+		private readonly State fallbackState;
 
-
-		public static readonly SolidProperty BackgroundProperty = SolidProperty.Register<Style, IBrush>(nameof(Background));
-
-		public static readonly SolidProperty BackgroundHoveredProperty = SolidProperty.Register<Style, IBrush>(nameof(BackgroundHovered));
-
-		public IBrush Background
+		public Style()
 		{
-			get { return Get<IBrush>(BackgroundProperty); }
-			set { Set(BackgroundProperty, value); }
+			this.fallbackState = new State() { style =this };
 		}
 
-		public IBrush Foreground { get; set; }
+		public State Default { get; set; }
 
-		public IBrush BackgroundHovered
+		public State Hovered { get; set; }
+
+		public State Active { get; set; }
+
+		public State Disabled { get; set; }
+		
+		public State GetState(StyleKey key)
 		{
-			get { return Get<IBrush>(BackgroundHoveredProperty); }
-			set { Set(BackgroundHoveredProperty, value); }
+			switch (key)
+			{
+				case StyleKey.Default: return this.Default ?? this.fallbackState; 
+				case StyleKey.Hovered: return this.Hovered ?? this.Default ?? this.fallbackState; 
+				case StyleKey.Active: return this.Active ?? this.Hovered ?? this.Default ?? this.fallbackState; 
+				case StyleKey.Disabled: return this.Disabled ?? this.Default ?? this.fallbackState;
+				default: throw new NotSupportedException();
+			}
 		}
-
-		public IBrush BackgroundActive { get; set; }
-
-		public IBrush BackgroundDisabled { get; set; }
-
-		public IBrush ForegroundHovered { get; set; }
-
-		public IBrush ForegroundActive { get; set; }
-
-		public IBrush ForegroundDisabled { get; set; }
 
 		/// <summary>
 		/// Gets the brush for the given style key. If no brush is available for this key, the default brush will be returned.
@@ -58,49 +55,28 @@
 		/// <returns></returns>
 		public IBrush GetBrush(StyleKey key, bool foreground)
 		{
+			var state = this.GetState(key);
+			if (state == null)
+				return null;
+
 			if (foreground)
-			{
-				switch (key)
-				{
-					case StyleKey.Default: return this.Foreground;
-					case StyleKey.Hovered: return this.ForegroundHovered ?? this.Foreground;
-					case StyleKey.Active: return this.ForegroundActive ?? this.Foreground;
-					case StyleKey.Disabled: return this.ForegroundDisabled ?? this.Foreground;
-					default: throw new ArgumentException("The given key is not a valid style key.", nameof(key));
-				}
-			}
+				return state.Foreground;
 			else
-			{
-				switch (key)
-				{
-					case StyleKey.Default: return this.Background;
-					case StyleKey.Hovered: return this.BackgroundHovered ?? this.Background;
-					case StyleKey.Active: return this.BackgroundActive ?? this.Background;
-					case StyleKey.Disabled: return this.BackgroundDisabled ?? this.Background;
-					default: throw new ArgumentException("The given key is not a valid style key.", nameof(key));
-				}
-			}
+				return state.Background;
 		}
 
 		void INamedNodeContainer.SetChildNodeName(object child, string name)
 		{
-			/*
-			var brushDescriptor = (BrushDescriptor)child;
-			switch (name)
+			var state = (State)child;
+			state.style = this;
+			switch(name)
 			{
-				case "Background":
-				{
-					this.Background = brushDescriptor.CreateBrush();
-					break;
-				}
-				default: throw new NotSupportedException($"The {name} is not a valid style option.");
+				case nameof(Default): this.Default = state; break;
+				case nameof(Hovered): this.Hovered = state; break;
+				case nameof(Active): this.Active = state; break;
+				case nameof(Disabled): this.Disabled = state; break;
+				default: throw new InvalidOperationException();
 			}
-			*/
-		}
-
-		public void SetChildNodeName(object child, string name)
-		{
-			throw new NotImplementedException();
 		}
 
 		public IFont Font
