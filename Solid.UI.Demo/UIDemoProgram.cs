@@ -35,7 +35,7 @@ namespace Solid.UI.Demo
 			this.ui.Skin = Skin.Load(this, "skin.sml");
 			this.ui.Input = new WindowsFormsInput(this);
 
-			var form = Form.Load("userinterface.sml");
+			var form = Form.Load("userinterface.sml", this);
 			form.ViewModel = new GameViewModel();
 
 			this.ui.CurrentForm = form;
@@ -78,6 +78,11 @@ namespace Solid.UI.Demo
 			var converter = TypeDescriptor.GetConverter(typeof(Font));
 			var font = (Font)converter.ConvertFromString(spec) ?? this.Font;
 			return new VirtualFont(this.graphics.graphics, font);
+		}
+
+		public IPicture CreatePicture(string value)
+		{
+			throw new NotImplementedException();
 		}
 	}
 
@@ -168,6 +173,11 @@ namespace Solid.UI.Demo
 		public void SetScissor(UI.Rectangle rect)
 		{
 			graphics.SetClip(ConvertRectangle(rect));
+		}
+
+		public void DrawPicture(IPicture picture, Rectangle rectangle)
+		{
+			throw new NotImplementedException();
 		}
 	}
 

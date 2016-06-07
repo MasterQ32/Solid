@@ -1,4 +1,4 @@
-﻿namespace Solid.UI
+﻿namespace Solid.UI.Widgets
 {
 	using System;
 	using Solid.Layout;

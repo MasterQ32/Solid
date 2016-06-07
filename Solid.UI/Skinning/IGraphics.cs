@@ -15,6 +15,13 @@ namespace Solid.UI.Skinning
 		Size ScreenSize { get; }
 
 		/// <summary>
+		/// Draws the given picture.
+		/// </summary>
+		/// <param name="picture"></param>
+		/// <param name="rectangle"></param>
+		void DrawPicture(IPicture picture, Rectangle rectangle);
+
+		/// <summary>
 		/// Clears full the virtual screen.
 		/// </summary>
 		/// <param name="color"></param>

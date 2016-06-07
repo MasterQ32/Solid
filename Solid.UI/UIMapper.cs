@@ -1,18 +1,16 @@
-﻿using Solid.Layout;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Solid.Markup;
-using Solid.UI.Skinning;
-using Solid.UI.Converters;
-
-namespace Solid.UI
+﻿namespace Solid.UI
 {
+	using Solid.Layout;
+	using Solid.Markup;
+	using Solid.UI.Skinning;
+	using Solid.UI.Converters;
+	using Solid.UI.Widgets;
+	using Skinning.Converters;
 	public class UIMapper : LayoutMapper
 	{
-		protected override IMarkupDocument<Widget> CreateDocument() => new Form();
+		private readonly IGraphicsObjectFactory factory;
+
+		protected override IMarkupDocument<Widget> CreateDocument() => new Form(this.factory);
 
 		public static void RegisterConverters<T>(MarkupMapper<T> mapper)
 			where T : class
@@ -25,13 +23,17 @@ namespace Solid.UI
 			//mapper.RegisterConverter<Texture, TextureConverter>();
 		}
 
-		public UIMapper()
+		public UIMapper(IGraphicsObjectFactory factory)
 		{
+			this.factory = factory;
+
 			RegisterConverters(this);
-			
+
+			this.RegisterConverter<IPicture>(new PictureConverter(factory));
+
 			this.RegisterType<Button>();
 			this.RegisterType<Label>();
-			// this.RegisterType<Image>();
+			this.RegisterType<Image>();
 		}
 
 		protected override Widget CreateNode(string nodeClass)
@@ -40,7 +42,7 @@ namespace Solid.UI
 			{
 				// Override widget with UIWidget
 				case "Widget": return new UIWidget();
-				case "Panel": return new Panel();
+				case "Panel": return new Widgets.Panel();
 				default: return base.CreateNode(nodeClass);
 			}
 		}

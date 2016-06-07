@@ -42,7 +42,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Button.cs" />
+    <Compile Include="Skinning\Converters\PictureConverter.cs" />
+    <Compile Include="Skinning\IPicture.cs" />
+    <Compile Include="Widgets\Button.cs" />
     <Compile Include="Converters\ColorConverter.cs" />
     <Compile Include="Command.cs" />
     <Compile Include="Form.cs" />
@@ -52,8 +54,9 @@
     <Compile Include="Input\MouseEventArgs.cs" />
     <Compile Include="Input\MouseEventType.cs" />
     <Compile Include="Input\TextInputEventArgs.cs" />
-    <Compile Include="Label.cs" />
-    <Compile Include="Panel.cs" />
+    <Compile Include="Widgets\Image.cs" />
+    <Compile Include="Widgets\Label.cs" />
+    <Compile Include="Widgets\Panel.cs" />
     <Compile Include="Rectangle.cs" />
     <Compile Include="Converters\RectangleConverter.cs" />
     <Compile Include="Skinning\Converters\BrushConverter.cs" />

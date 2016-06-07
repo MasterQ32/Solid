@@ -19,6 +19,7 @@ namespace Solid.UI.Skinning
 
 			this.RegisterConverter<IFont>(new FontConverter(objectFactory));
 			this.RegisterConverter<IBrush>(new BrushConverter(objectFactory));
+			this.RegisterConverter<IPicture>(new PictureConverter(objectFactory));
 
 			// this.RegisterType<TextureBrushDescriptor>("Texture");
 			// this.RegisterType<SolidBrushDescriptor>("Color");

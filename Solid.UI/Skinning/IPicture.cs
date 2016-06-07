@@ -4,10 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Solid.UI
+namespace Solid.UI.Skinning
 {
-	public class Panel : UIWidget
+	public interface IPicture
 	{
+		int Width { get; }
 
+		int Height { get; }
 	}
 }

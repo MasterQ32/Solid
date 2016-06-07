@@ -5,5 +5,7 @@
 		IBrush CreateBrush(string spec);
 
 		IFont CreateFont(string spec);
+
+		IPicture CreatePicture(string value);
 	}
 }

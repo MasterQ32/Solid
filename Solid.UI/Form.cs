@@ -11,8 +11,8 @@ namespace Solid.UI
 	{
 		private static readonly Dictionary<string, Type> customTypes = new Dictionary<string, Type>();
 
-		public Form() :
-			base(new UIMapper())
+		public Form(IGraphicsObjectFactory factory) :
+			base(new UIMapper(factory))
 		{
 
 		}
@@ -46,21 +46,21 @@ namespace Solid.UI
 			where T : UIWidget
 			=> RegisterCustomWidget<T>(typeof(T).Name);
 
-		public static Form Load(string fileName)
+		public static Form Load(string fileName, IGraphicsObjectFactory factory)
 		{
 			var document = Parser.Load(fileName);
-			return Create(document);
+			return Create(document, factory);
 		}
 
-		public static Form Load(Stream stream, System.Text.Encoding encoding)
+		public static Form Load(Stream stream, System.Text.Encoding encoding, IGraphicsObjectFactory factory)
 		{
 			var document = Parser.Parse(stream, encoding);
-			return Create(document);
+			return Create(document, factory);
 		}
 
-		private static Form Create(MarkupDocument document)
+		private static Form Create(MarkupDocument document, IGraphicsObjectFactory factory)
 		{
-			var mapper = new UIMapper();
+			var mapper = new UIMapper(factory);
 			lock (customTypes)
 			{
 				foreach (var ctype in customTypes)
