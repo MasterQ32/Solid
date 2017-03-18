@@ -1,5 +1,7 @@
 ﻿Widget
 {
+	StackPanel(Template = "pressed-number.sml", Items = [PressedNumbers], Direction=Vertical, HorizontalAlignment=Right, Width=200);
+	
 	Panel(VerticalAlignment=Center, HorizontalAlignment=Center, Margin=16)
 	{
 		DockPanel(Margin=16) {
@@ -39,19 +41,17 @@
 				}
 				
 				Button(Table.Row=3, Table.Column=0, ClickCommand=[Clear]) {
-					
+					Image(Picture = "red_cross.png", IsTouchable=false);
 				}
 				Button(Table.Row=3, Table.Column=1, ClickCommand=[Input0]) {
 					Label(Text="0");
 				}
 				Button(Table.Row=3, Table.Column=2, ClickCommand=[Check]) {
-					
+					Image(Picture = "green_checkmark.png", IsTouchable=false);
 				}
 			}
 		}
 	}
-
-	StackPanel(Template = "pressed-number.sml", Items = [PressedNumbers], Direction=Vertical, HorizontalAlignment=Right, Width=200);
 }
 
 

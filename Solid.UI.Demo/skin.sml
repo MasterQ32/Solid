@@ -2,14 +2,22 @@ Skin
 {
 	Button : Style(
 		Width=48, Height=48, 
-		Padding="0;0;0;10",
-		Background = "button-normal.png",
-		BackgroundHovered = "button-hovered.png");
+		Padding="0;0;0;10")
+	{
+		Default : State(Background = "button-normal.png");
+		Hovered : State(Background = "button-hovered.png");
+	}
 	Label : Style(
-		Font="Courier New;12pt",
+		Font="Monospace,12pt",
 		FontColor="1;1;1");
-	Panel : Style(
-		Background = "panel.png");
+	Panel : Style
+	{
+		Default : State(Background = "panel.png");
+	}
+	Image : Style(Margin="4;8;4;4", VerticalAlignment=Center, HorizontalAlignment=Center)
+	{
+		
+	}
 }
 
 Default : TextureBox(EdgeWidth = 10) {

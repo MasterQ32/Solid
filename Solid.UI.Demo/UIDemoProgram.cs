@@ -25,7 +25,7 @@ namespace Solid.UI.Demo
 
 		UserInterface ui;
 		private readonly VirtualGraphics graphics;
-		
+
 
 		public UIDemoProgram()
 		{
@@ -82,8 +82,24 @@ namespace Solid.UI.Demo
 
 		public IPicture CreatePicture(string value)
 		{
-			throw new NotImplementedException();
+			return new VirtualPicture(new Bitmap(value));
 		}
+	}
+
+	sealed class VirtualPicture : IPicture
+	{
+		private readonly Bitmap bitmap;
+
+		public VirtualPicture(Bitmap bitmap)
+		{
+			this.bitmap = bitmap;
+		}
+
+		public int Height => this.bitmap.Height;
+
+		public int Width => this.bitmap.Width;
+		
+		public Image Image => this.bitmap;
 	}
 
 	sealed class VirtualGraphics : IGraphics
@@ -177,7 +193,8 @@ namespace Solid.UI.Demo
 
 		public void DrawPicture(IPicture picture, Rectangle rectangle)
 		{
-			throw new NotImplementedException();
+			var vp = (VirtualPicture)picture;
+			graphics.DrawImage(vp.Image, ConvertRectangle(rectangle));
 		}
 	}
 
@@ -211,10 +228,14 @@ namespace Solid.UI.Demo
 
 		public Layout.Size Measure(string text, float? maxWidth = default(float?))
 		{
+			Layout.Size size;
 			if (maxWidth != null)
-				return Convert(graphics.MeasureString(text, this.Font, (int)maxWidth));
+				size = Convert(graphics.MeasureString(text, this.Font, (int)maxWidth));
 			else
-				return Convert(graphics.MeasureString(text, this.Font));
+				size = Convert(graphics.MeasureString(text, this.Font));
+			if(size.Height < this.Font.GetHeight(graphics))
+				size.Height = this.Font.GetHeight(graphics);
+			return size;
 		}
 
 		static Layout.Size Convert(System.Drawing.SizeF s)
